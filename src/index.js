@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const {RRule, RRuleSet, rrulestr} = require('rrule')
+const {RRule} = require('rrule')
 const yargs = require('yargs/yargs')
 const {hideBin} = require('yargs/helpers')
 const fs = require('fs').promises
@@ -8,11 +8,11 @@ const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
 const dayjs = require('dayjs')
-const dayjsToArray = require('dayjs/plugin/toArray')
 
-dayjs.extend(dayjsToArray)
-
-// Handle any script errors here
+/**
+ * Handle script errors
+ * @param message - The error message
+ */
 const handleError = (message) => {
     console.error('\nAn error has occurred 🤕')
     throw new Error(message)
@@ -63,7 +63,7 @@ if (argv.docs) {
             TIME2           The time for when the events defined in DAYS2 occur, in the format of HH-DD (24 hours)
             
         EXAMPLE USAGE
-            node src/index.js --input=/path/to/input.csv --output=/path/to/output.ics         
+            node src/index.js --input=/path/to/input.csv --from=2020-01-01 --to=2020-03-01 
             
     `)
 
@@ -73,11 +73,6 @@ if (argv.docs) {
 // If --input was not passed to the script, throw an error
 if (!argv.input) {
     handleError('--input is missing')
-}
-
-// if --output was not passed to the script, throw an error
-if (!argv.output) {
-    handleError('--output is missing')
 }
 
 // if --from was not passed to the script, throw an error
@@ -90,12 +85,20 @@ if (!argv.to) {
     handleError('--to is missing')
 }
 
-// returns the days from a string
-// ex. A string, 'M,Th,F' will return ['M','Th','F']
+/**
+ * Returns the days from a string
+ * @param str - The string of days in the format M,T,W,Th,F
+ * @returns {string[]}
+ * @example A string, 'M,Th,F' will return ['M','Th','F']
+ */
 const daysFromString = (str) => str.split(',')
 
-// returns the from and to time from a string
-// ex. A string, '12:00 - 14:00` will return { from: '12:00', to: '14:00' }
+/**
+ * Returns the from and to time from a string
+ * @param str - The time string in the format of hh:mm - hh:mm
+ * @returns {{ from: string, to: string }}
+ * @example '12:00 - 14:00` will return { from: '12:00', to: '14:00' }
+ */
 const timeFromString = (str) => {
     const s = str.split('-')
     const from = s[0].trim()
@@ -103,9 +106,13 @@ const timeFromString = (str) => {
     return { from, to }
 }
 
-// converts ms to days, hour, minute, seconds
-// https://gist.github.com/Erichain/6d2c2bf16fe01edfcffa
-const convertMS = ( ms ) => {
+/**
+ * Converts ms to days, hour, minute, seconds
+ * @param ms - The time in ms
+ * @see https://gist.github.com/Erichain/6d2c2bf16fe01edfcffa
+ * @returns {{ hours: number, seconds: number, minutes: number, days: number }}
+ */
+const convertMS = (ms) => {
     let days, hours, minutes, seconds
     seconds = Math.floor(ms / 1000)
     minutes = Math.floor(seconds / 60)
@@ -117,6 +124,11 @@ const convertMS = ( ms ) => {
     return { days, hours, minutes, seconds }
 }
 
+/**
+ * Return the difference in time between a time string
+ * @param timeStr - The time string to get the difference from. This needs to be in the format of hh:mm - hh:mm
+ * @returns {{hours: number, seconds: number, minutes: number, days: number}}
+ */
 const timeDiff = (timeStr) => {
 
     // Get the hours for t1
@@ -139,8 +151,11 @@ const timeDiff = (timeStr) => {
     return convertMS(diff)
 }
 
-
-
+/**
+ * The main function
+ * @param argv - Arguments - See docs
+ * @returns {Promise<void>}
+ */
 const main = async (argv) => {
 
     // Create the file path
@@ -158,87 +173,101 @@ const main = async (argv) => {
     }
 
     // Handle the processing of a single row of data
-    const processRow = ([ title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2 ]) => {
+    const processRow = async ([ title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2 ]) => {
 
-        // Create the rrule for days1 & times1
-        const splitDays1 = daysFromString(days1)
-        const rrule1 = new RRule({
-            freq: RRule.WEEKLY,
-            byweekday: splitDays1.map(day => {
-                switch(day) {
-                    case 'M':
-                        return RRule.MO
-                    case 'T':
-                        return RRule.TU
-                    case 'W':
-                        return RRule.WE
-                    case 'Th':
-                        return RRule.TH
-                    case 'F':
-                        return RRule.FR
-                    default:
-                        break
+        const createAndWriteEvent = async (instr, email, days, times) => {
+            try {
+
+                const spl = daysFromString(days)
+                const rrule = new RRule({
+                    freq: RRule.WEEKLY,
+                    byweekday: spl.map(day => {
+                        switch(day) {
+                            case 'M':
+                                return RRule.MO
+                            case 'T':
+                                return RRule.TU
+                            case 'W':
+                                return RRule.WE
+                            case 'Th':
+                                return RRule.TH
+                            case 'F':
+                                return RRule.FR
+                            default:
+                                break
+                        }
+                    })
+                        .filter(day => day),
+                    dtstart: new Date(argv.from),
+                    until: new Date(argv.to)
+                })
+
+                const formattedStart = dayjs(argv.from).format('YYYY-MM-DD').split('-')
+
+                const event = {
+                    // Start is in the format [year, month, day, hour, min]
+                    start: [...formattedStart, 0, 0],
+                    duration: timeDiff(times),
+                    recurrenceRule: rrule.toString(),
+                    title: `${subject} ${course}`,
+                    description: title,
+                    status: 'CONFIRMED',
+                    organizer: {
+                        name: instr,
+                        email: email
+                    }
                 }
-            })
-                .filter(day => day),
-            dtstart: new Date(argv.from),
-            until: new Date(argv.to)
-        })
 
-        console.debug('Processing days')
-        console.debug(splitDays1)
+                const fp = ics.createEvent(event, async (err, val) => {
 
-        console.debug('rrule set')
-        console.debug(rrule1)
+                    if (err) {
+                        throw err
+                    }
 
-        const formattedStart = dayjs(argv.from).format('YYYY-MM-DD').split('-')
+                    // Standardize ics value to conform with ics spec
+                    const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
 
-        console.debug('Formatting start datetime')
-        console.debug(formattedStart)
+                    // Set the file name
+                    const fn = formattedStart.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
 
-        // Create the ICS for days1 & times1
-        const event1 = {
-            // Start is in the format [year, month, day, hour, min]
-            start: [...formattedStart, 0, 0],
-            duration: timeDiff(time1),
-            recurrenceRule: rrule1.toString(),
-            title: `${subject} ${course}`,
-            description: title,
-            status: 'CONFIRMED',
-            organizer: {
-                name: instr1,
-                email: email1
+                    // Set the filepath
+                    const fp = `output/${fn}`
+
+                    // Save the file
+                    await fs.writeFile(fp, newVal, {flag: 'w', encoding: 'utf8'})
+
+                    // Resolve promise with filepath
+                    return fp
+
+                })
+
+                return fp
+
+            } catch (e) {
+                // Reject promise with error
+                throw e
             }
         }
 
-        ics.createEvent(event1, async (err, val) => {
-            if (err) {
-                console.error(err)
-                return
-            }
+        // Create the ics file for the primary event
+        const fp1 = await createAndWriteEvent(instr1, email1, days1, time1)
+        console.log('Wrote new ics to disk', fp1)
 
-            console.debug('Event created')
-            console.debug('Writing file to disk')
-
-            // Save the event to the folder specified
-            const filename = `${formattedStart}_${subject}_${course}.ics`.replace(/[^\w\s]/gi, '_')
-            await fs.writeFile(`output/${filename}`, val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n"), {flag: 'w', encoding: 'utf8'})
-
-        })
-
-        // Create ICS for days2 & times2 (if they exist)
-        // const splitDays2 = daysFromString(days)
-
-        // Create the ICS for days2 & times2
+        // If days2 and time2 are provided, create the ics for that event
+        if (days2 && time2) {
+            const fp2 = await createAndWriteEvent(instr1, email1, days2, time2)
+            console.log('Wrote new ics to disk', fp2)
+        }
 
     }
 
     // Handle the processed results
     const handleResults = (results) => {
-        const header = results.data[0].map(i => i.trim())
         const rows = results.data.slice(1)
         // Process the rows
-        rows.forEach(processRow)
+        rows.forEach(async row => {
+            await processRow(row)
+        })
     }
 
     // Use the papa to parse the file 🍕
@@ -250,4 +279,5 @@ const main = async (argv) => {
 
 (async() => {
     await main(argv)
+    return 0
 })()
