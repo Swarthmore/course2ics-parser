@@ -1,27 +1,21 @@
 #!/usr/bin/env node
 
+const {RRule, RRuleSet, rrulestr} = require('rrule')
 const yargs = require('yargs/yargs')
 const {hideBin} = require('yargs/helpers')
-const fs = require('fs')
-const {promisify} = require('util')
+const fs = require('fs').promises
 const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
+const dayjs = require('dayjs')
+const dayjsToArray = require('dayjs/plugin/toArray')
 
-// Promisify fs.readFile
-const asyncReadFile = promisify(fs.readFile)
+dayjs.extend(dayjsToArray)
 
 // Handle any script errors here
 const handleError = (message) => {
     console.error('\nAn error has occurred 🤕')
     throw new Error(message)
-}
-
-// Output a debug message, only if the --verbose arg was passed
-const debugMessage = (message) => {
-    if (argv.verbose) {
-        console.debug(message)
-    }
 }
 
 // If --docs was passed as an argument, show the documentation, then end the process
@@ -35,14 +29,14 @@ if (argv.docs) {
             
             The following options are available:
             
-            --input     The path to the input csv. REQUIRED.
+            --input     REQUIRED. The path to the input csv. 
           
-            --output    The path to the output ics REQUIRED.
+            --output    REQUIRED. The path to the output ics.
             
-            --from      The starting date. REQUIRED.
+            --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
             
-            --to        The ending date. REQUIRED.
-            
+            --to        REQUIRED. The ending date. Must be in ISO format YYYY-MM-DD.
+
             --verbose   Run with verbose output.
         
             --docs      View the help docs (You're reading them! 🚀)
@@ -109,66 +103,140 @@ const timeFromString = (str) => {
     return { from, to }
 }
 
-(async () => {
+// converts ms to days, hour, minute, seconds
+// https://gist.github.com/Erichain/6d2c2bf16fe01edfcffa
+const convertMS = ( ms ) => {
+    let days, hours, minutes, seconds
+    seconds = Math.floor(ms / 1000)
+    minutes = Math.floor(seconds / 60)
+    seconds = seconds % 60
+    hours = Math.floor(minutes / 60)
+    minutes = minutes % 60
+    days = Math.floor(hours / 24)
+    hours = hours % 24
+    return { days, hours, minutes, seconds }
+}
 
+const timeDiff = (timeStr) => {
+
+    // Get the hours for t1
+    const {from, to} = timeFromString(timeStr)
+
+    const [fromHrs, fromMins] = from.split(':')
+    const [toHrs, toMins] = to.split(':')
+
+    // Use an arbitrary date for each
+    const d1 = new Date(2000, 0, 1,  fromHrs, fromMins)
+    const d2 = new Date(2000, 0, 1, toHrs, toMins)
+
+    // the following is to handle cases where the times are on the opposite side of
+    // midnight e.g. when you want to get the difference between 9:00 PM and 5:00 AM
+    if (d2 < d1) {
+        d2.setDate(d2.getDate() + 1);
+    }
+
+    const diff = d2 - d1
+    return convertMS(diff)
+}
+
+
+
+const main = async (argv) => {
 
     // Create the file path
     const fp = `${__dirname}/${argv.input}`
 
     // Read the CSV
-    const file = await asyncReadFile(fp, 'utf8')
+    const file = await fs.readFile(fp, 'utf8')
+
+    // Output a debug message. This will only work if --verbose is passed to the script
+    const debugMessage = (message) => {
+        if (!argv.verbose) return
+        console.debug(
+            typeof message === 'string' ? message : JSON.stringify(message)
+        )
+    }
+
+    // Handle the processing of a single row of data
+    const processRow = ([ title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2 ]) => {
+
+        // Create the rrule for days1 & times1
+        const splitDays1 = daysFromString(days1)
+        const rrule1 = new RRule({
+            freq: RRule.WEEKLY,
+            byweekday: splitDays1.map(day => {
+                switch(day) {
+                    case 'M':
+                        return RRule.MO
+                    case 'T':
+                        return RRule.TU
+                    case 'W':
+                        return RRule.WE
+                    case 'Th':
+                        return RRule.TH
+                    case 'F':
+                        return RRule.FR
+                    default:
+                        break
+                }
+            })
+                .filter(day => day),
+            dtstart: new Date(argv.from),
+            until: new Date(argv.to)
+        })
+
+        console.debug('Processing days')
+        console.debug(splitDays1)
+
+        console.debug('rrule set')
+        console.debug(rrule1)
+
+        const formattedStart = dayjs(argv.from).format('YYYY-MM-DD').split('-')
+
+        console.debug('Formatting start datetime')
+        console.debug(formattedStart)
+
+        // Create the ICS for days1 & times1
+        const event1 = {
+            // Start is in the format [year, month, day, hour, min]
+            start: [...formattedStart, 0, 0],
+            duration: timeDiff(time1),
+            recurrenceRule: rrule1.toString(),
+            title: `${subject} ${course}`,
+            description: title,
+            status: 'CONFIRMED',
+            organizer: {
+                name: instr1,
+                email: email1
+            }
+        }
+
+        ics.createEvent(event1, async (err, val) => {
+            if (err) {
+                console.error(err)
+                return
+            }
+
+            console.debug('Event created')
+            console.debug('Writing file to disk')
+
+            // Save the event to the folder specified
+            const filename = `${formattedStart}_${subject}_${course}.ics`.replace(/[^\w\s]/gi, '_')
+            await fs.writeFile(`output/${filename}`, val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n"), {flag: 'w', encoding: 'utf8'})
+
+        })
+
+        // Create ICS for days2 & times2 (if they exist)
+        // const splitDays2 = daysFromString(days)
+
+        // Create the ICS for days2 & times2
+
+    }
 
     // Handle the processed results
     const handleResults = (results) => {
-
         const header = results.data[0].map(i => i.trim())
         const rows = results.data.slice(1)
-
-        // Handle the processing of a single row of data
-        const processRow = (row) => {
-
-            // Placeholder for the calendar event
-            const event = {
-                // Start is in the format [year, month, day, hour, min]
-                // so [2000, 1, 5, 10, 0] would be Jan 5, 2000 10:00AM
-                start: [],
-                duration: { hours: 0, minutes: 0 },
-                title: '',
-                description: '',
-                location: '',
-                url: '',
-                categories: ['arr', 'of', 'strings'],
-                status: 'CONFIRMED',
-                busyStatus: 'BUSY',
-                organizer: {
-                    name: '',
-                    email: ''
-                },
-                attendees: [
-                    { name: '', email: '', rsvp: true, partstat: 'ACCEPTED', role: 'REQ-PARTICIPANT' }
-                ]
-            }
-
-            // For each row item, output what it represents, along with the data
-            row.forEach((item, index) => {
-
-                const type = header[index]
-
-                if (type === ("DAYS1" || "DAYS2")) {
-                    console.log(
-                        daysFromString(item)
-                    )
-                }
-
-                if (type === ("TIME1" || "TIME2")) {
-                    console.log(
-                        timeFromString(item)
-                    )
-                }
-            })
-
-        }
-
         // Process the rows
         rows.forEach(processRow)
     }
@@ -178,4 +246,8 @@ const timeFromString = (str) => {
         complete: results => handleResults(results)
     })
 
+}
+
+(async() => {
+    await main(argv)
 })()
