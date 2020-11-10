@@ -8,6 +8,13 @@ const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
 const dayjs = require('dayjs')
+const utc = require('dayjs/plugin/utc')
+const tz = require('dayjs/plugin/timezone')
+
+dayjs.extend(utc)
+dayjs.extend(tz)
+
+dayjs.tz.setDefault('America/New_York')
 
 /**
  * Handle script errors
@@ -86,6 +93,31 @@ if (!argv.to) {
 }
 
 /**
+ * Returns a numeric representation of day string
+ * @param day - The day. One of M,T,W,Th,F,Sa
+ * @returns {number}
+ */
+const dayToNum = day => {
+    switch(day) {
+        case 'S':
+            return 0
+        case 'M':
+            return 1
+        case 'T':
+            return 2
+        case 'W':
+            return 3
+        case 'Th':
+            return 4
+        case 'F':
+            return 5
+        case 'Sa':
+            return 6
+        default:
+            throw new Error('Invalid day given')
+    }
+}
+/**
  * Returns the days from a string
  * @param str - The string of days in the format M,T,W,Th,F
  * @returns {string[]}
@@ -151,6 +183,37 @@ const timeDiff = (timeStr) => {
     return convertMS(diff)
 }
 
+const firstDayAfterDate = (fromDate, days, times) => {
+    try {
+        // Get the first item in the days string
+        // This will give one of M,T,W,Th,F
+        const [firstDay] = daysFromString(days)
+        // Convert day to num
+        const firstDayNum = dayToNum(firstDay)
+        // Create from date
+        // Get the time and add it to the dayjs object
+        const t = timeFromString(times)
+        const [hrs, mins] = t.from.split(':')
+        const from = dayjs(fromDate)
+        from.hour(+hrs)
+        from.minute(+mins)
+        // placeholder for the dayjs object matching the first occurance of day
+        let first = from.clone()
+
+        do {
+            first = first.add(1, 'day')
+
+        } while (first.get('day') !== firstDayNum)
+
+        console.log(first.format())
+
+        // return the first occurance
+        return first
+
+    } catch (e) {
+        throw e
+    }
+}
 /**
  * The main function
  * @param argv - Arguments - See docs
@@ -166,6 +229,7 @@ const main = async (argv) => {
 
     // Output a debug message. This will only work if --verbose is passed to the script
     const debugMessage = (message) => {
+        return
         if (!argv.verbose) return
         console.debug(
             typeof message === 'string' ? message : JSON.stringify(message)
@@ -198,18 +262,31 @@ const main = async (argv) => {
                         }
                     })
                         .filter(day => day),
-                    dtstart: new Date(argv.from),
                     until: new Date(argv.to)
                 })
 
-                const formattedStart = dayjs(argv.from).format('YYYY-MM-DD').split('-')
+                const firstDay = firstDayAfterDate(argv.from, days, times)
+                const eventStart = firstDay.format('YYYY-MM-DD').split('-').map(i => +i)
+
+                const duration = timeDiff(times)
+
+                // rrule.toString() will include the beginning RRULE:
+                // This is not needed with the ics library
+                // This line of code splits the returned rrule string at RRULE: and assigns the
+                // second part (the part we need) to a variable.
+                const [,recurrenceRule] = rrule.toString().split('RRULE:')
+
+                const eventTitle = `${subject}${course}`
+
+                console.log('Using date')
+                console.log(firstDay.format('MMM D, YYYY HH:mm'))
 
                 const event = {
                     // Start is in the format [year, month, day, hour, min]
-                    start: [...formattedStart, 0, 0],
-                    duration: timeDiff(times),
-                    recurrenceRule: rrule.toString(),
-                    title: `${subject} ${course}`,
+                    start: [firstDay.get('year'), firstDay.get('month') + 1, firstDay.get('date'), firstDay.get('hour'), firstDay.get('minute')],
+                    duration: duration,
+                    recurrenceRule: recurrenceRule,
+                    title: eventTitle,
                     description: title,
                     status: 'CONFIRMED',
                     organizer: {
@@ -225,16 +302,16 @@ const main = async (argv) => {
                     }
 
                     // Standardize ics value to conform with ics spec
-                    const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
+                    // const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
 
                     // Set the file name
-                    const fn = formattedStart.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
+                    const fn = eventStart.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
 
                     // Set the filepath
                     const fp = `output/${fn}`
 
                     // Save the file
-                    await fs.writeFile(fp, newVal, {flag: 'w', encoding: 'utf8'})
+                    await fs.writeFile(fp, val)
 
                     // Resolve promise with filepath
                     return fp
