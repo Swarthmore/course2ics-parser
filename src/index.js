@@ -7,14 +7,9 @@ const fs = require('fs').promises
 const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
-const dayjs = require('dayjs')
-const utc = require('dayjs/plugin/utc')
-const tz = require('dayjs/plugin/timezone')
+const moment = require('moment')
 
-dayjs.extend(utc)
-dayjs.extend(tz)
-
-dayjs.tz.setDefault('America/New_York')
+moment().format()
 
 /**
  * Handle script errors
@@ -37,8 +32,6 @@ if (argv.docs) {
             The following options are available:
             
             --input     REQUIRED. The path to the input csv. 
-          
-            --output    REQUIRED. The path to the output ics.
             
             --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
             
@@ -71,6 +64,9 @@ if (argv.docs) {
             
         EXAMPLE USAGE
             node src/index.js --input=/path/to/input.csv --from=2020-01-01 --to=2020-03-01 
+        
+        CAVEATS
+            Files will be saved to PROJECT_ROOT/output. This means the output folder must be created before usage.
             
     `)
 
@@ -191,21 +187,19 @@ const firstDayAfterDate = (fromDate, days, times) => {
         // Convert day to num
         const firstDayNum = dayToNum(firstDay)
         // Create from date
-        // Get the time and add it to the dayjs object
         const t = timeFromString(times)
         const [hrs, mins] = t.from.split(':')
-        const from = dayjs(fromDate)
-        from.hour(+hrs)
-        from.minute(+mins)
-        // placeholder for the dayjs object matching the first occurance of day
-        let first = from.clone()
+        const from = moment(fromDate)
+        from.set('hour', hrs)
+        from.set('minute', mins)
+
+        // placeholder for the moment object matching the first occurrence of day
+        let first = moment(from)
 
         do {
-            first = first.add(1, 'day')
+            first = first.add(1, 'days')
 
-        } while (first.get('day') !== firstDayNum)
-
-        console.log(first.format())
+        } while (first.day() !== firstDayNum)
 
         // return the first occurance
         return first
@@ -229,7 +223,6 @@ const main = async (argv) => {
 
     // Output a debug message. This will only work if --verbose is passed to the script
     const debugMessage = (message) => {
-        return
         if (!argv.verbose) return
         console.debug(
             typeof message === 'string' ? message : JSON.stringify(message)
@@ -266,7 +259,7 @@ const main = async (argv) => {
                 })
 
                 const firstDay = firstDayAfterDate(argv.from, days, times)
-                const eventStart = firstDay.format('YYYY-MM-DD').split('-').map(i => +i)
+                const start = firstDay.format('YYYY-M-D-H-m').split("-")
 
                 const duration = timeDiff(times)
 
@@ -283,7 +276,7 @@ const main = async (argv) => {
 
                 const event = {
                     // Start is in the format [year, month, day, hour, min]
-                    start: [firstDay.get('year'), firstDay.get('month') + 1, firstDay.get('date'), firstDay.get('hour'), firstDay.get('minute')],
+                    start: start,
                     duration: duration,
                     recurrenceRule: recurrenceRule,
                     title: eventTitle,
@@ -305,7 +298,7 @@ const main = async (argv) => {
                     // const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
 
                     // Set the file name
-                    const fn = eventStart.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
+                    const fn = start.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
 
                     // Set the filepath
                     const fp = `output/${fn}`
