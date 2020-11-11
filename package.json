@@ -2,6 +2,7 @@
   "name": "course2ics",
   "version": "0.0.1",
   "license": "MIT",
+  "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
   "source": "src/index.js",
   "main": "dist/course2ics.js",
   "module": "dist/course2ics.module.js",
@@ -20,5 +21,13 @@
   },
   "devDependencies": {
     "microbundle": "^0.12.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Swarthmore/course2ics.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Swarthmore/course2ics/issues"
+  },
+  "homepage": "https://github.com/Swarthmore/course2ics"
 }
