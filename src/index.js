@@ -7,7 +7,10 @@ const fs = require('fs').promises
 const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
-const dayjs = require('dayjs')
+const moment = require('moment')
+
+// See: https://momentjs.com/docs/#/use-it/node-js/
+moment().format()
 
 /**
  * Handle script errors
@@ -30,8 +33,6 @@ if (argv.docs) {
             The following options are available:
             
             --input     REQUIRED. The path to the input csv. 
-          
-            --output    REQUIRED. The path to the output ics.
             
             --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
             
@@ -64,6 +65,9 @@ if (argv.docs) {
             
         EXAMPLE USAGE
             node src/index.js --input=/path/to/input.csv --from=2020-01-01 --to=2020-03-01 
+        
+        CAVEATS
+            Files will be saved to PROJECT_ROOT/output. This means the output folder must be created before usage.
             
     `)
 
@@ -85,6 +89,31 @@ if (!argv.to) {
     handleError('--to is missing')
 }
 
+/**
+ * Returns a numeric representation of day string
+ * @param day - The day. One of M,T,W,Th,F,Sa
+ * @returns {number}
+ */
+const dayToNum = day => {
+    switch(day) {
+        case 'S':
+            return 0
+        case 'M':
+            return 1
+        case 'T':
+            return 2
+        case 'W':
+            return 3
+        case 'Th':
+            return 4
+        case 'F':
+            return 5
+        case 'Sa':
+            return 6
+        default:
+            throw new Error('Invalid day given')
+    }
+}
 /**
  * Returns the days from a string
  * @param str - The string of days in the format M,T,W,Th,F
@@ -152,6 +181,50 @@ const timeDiff = (timeStr) => {
 }
 
 /**
+ * Return the first day that occurs, starting at fromDate
+ * @param fromDate
+ * @param days
+ * @param times
+ * @returns {void | this | number | this | IDBRequest<IDBValidKey> | DataTransferItem | Promise<void>}
+ */
+const firstDayAfterDate = (fromDate, days, times) => {
+    try {
+
+        // Get the first item in the days string
+        // This will give one of M,T,W,Th,F
+        const [firstDay] = daysFromString(days)
+
+        // Convert day to num
+        const firstDayNum = dayToNum(firstDay)
+
+        // Get the start time from the times string
+
+        const {from: fromTime} = timeFromString(times)
+        // Get the hours and minutes from fromTime
+        const [hrs, mins] = fromTime.split(':')
+
+        // Create the from date object and assign the hours and minutes to it
+        const from = moment(fromDate)
+        from.set('hour', hrs)
+        from.set('minute', mins)
+
+        // placeholder for the moment object matching the first occurrence of day
+        let first = moment(from)
+
+        // increment first.day until it matches firstDayNum
+        do {
+            first = first.add(1, 'days')
+
+        } while (first.day() !== firstDayNum)
+
+        // return the first occurance
+        return first
+
+    } catch (e) {
+        throw e
+    }
+}
+/**
  * The main function
  * @param argv - Arguments - See docs
  * @returns {Promise<void>}
@@ -175,6 +248,14 @@ const main = async (argv) => {
     // Handle the processing of a single row of data
     const processRow = async ([ title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2 ]) => {
 
+        /**
+         * Creates a single ics file
+         * @param instr
+         * @param email
+         * @param days
+         * @param times
+         * @returns {Promise<*>}
+         */
         const createAndWriteEvent = async (instr, email, days, times) => {
             try {
 
@@ -198,18 +279,28 @@ const main = async (argv) => {
                         }
                     })
                         .filter(day => day),
-                    dtstart: new Date(argv.from),
                     until: new Date(argv.to)
                 })
 
-                const formattedStart = dayjs(argv.from).format('YYYY-MM-DD').split('-')
+                const firstDay = firstDayAfterDate(argv.from, days, times)
+                const start = firstDay.format('YYYY-M-D-H-m').split("-")
+
+                const duration = timeDiff(times)
+
+                // rrule.toString() will include the beginning RRULE:
+                // This is not needed with the ics library
+                // This line of code splits the returned rrule string at RRULE: and assigns the
+                // second part (the part we need) to a variable.
+                const [,recurrenceRule] = rrule.toString().split('RRULE:')
+
+                const eventTitle = `${subject}${course}`
 
                 const event = {
                     // Start is in the format [year, month, day, hour, min]
-                    start: [...formattedStart, 0, 0],
-                    duration: timeDiff(times),
-                    recurrenceRule: rrule.toString(),
-                    title: `${subject} ${course}`,
+                    start: start,
+                    duration: duration,
+                    recurrenceRule: recurrenceRule,
+                    title: eventTitle,
                     description: title,
                     status: 'CONFIRMED',
                     organizer: {
@@ -224,17 +315,14 @@ const main = async (argv) => {
                         throw err
                     }
 
-                    // Standardize ics value to conform with ics spec
-                    const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
-
                     // Set the file name
-                    const fn = formattedStart.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
+                    const fn = start.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
 
                     // Set the filepath
                     const fp = `output/${fn}`
 
                     // Save the file
-                    await fs.writeFile(fp, newVal, {flag: 'w', encoding: 'utf8'})
+                    await fs.writeFile(fp, val)
 
                     // Resolve promise with filepath
                     return fp
