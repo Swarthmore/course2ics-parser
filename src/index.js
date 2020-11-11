@@ -9,6 +9,7 @@ const Papa = require('papaparse')
 const ics = require('ics')
 const moment = require('moment')
 
+// See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
 
 /**
@@ -179,16 +180,30 @@ const timeDiff = (timeStr) => {
     return convertMS(diff)
 }
 
+/**
+ * Return the first day that occurs, starting at fromDate
+ * @param fromDate
+ * @param days
+ * @param times
+ * @returns {void | this | number | this | IDBRequest<IDBValidKey> | DataTransferItem | Promise<void>}
+ */
 const firstDayAfterDate = (fromDate, days, times) => {
     try {
+
         // Get the first item in the days string
         // This will give one of M,T,W,Th,F
         const [firstDay] = daysFromString(days)
+
         // Convert day to num
         const firstDayNum = dayToNum(firstDay)
-        // Create from date
-        const t = timeFromString(times)
-        const [hrs, mins] = t.from.split(':')
+
+        // Get the start time from the times string
+
+        const {from: fromTime} = timeFromString(times)
+        // Get the hours and minutes from fromTime
+        const [hrs, mins] = fromTime.split(':')
+
+        // Create the from date object and assign the hours and minutes to it
         const from = moment(fromDate)
         from.set('hour', hrs)
         from.set('minute', mins)
@@ -196,6 +211,7 @@ const firstDayAfterDate = (fromDate, days, times) => {
         // placeholder for the moment object matching the first occurrence of day
         let first = moment(from)
 
+        // increment first.day until it matches firstDayNum
         do {
             first = first.add(1, 'days')
 
@@ -232,6 +248,14 @@ const main = async (argv) => {
     // Handle the processing of a single row of data
     const processRow = async ([ title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2 ]) => {
 
+        /**
+         * Creates a single ics file
+         * @param instr
+         * @param email
+         * @param days
+         * @param times
+         * @returns {Promise<*>}
+         */
         const createAndWriteEvent = async (instr, email, days, times) => {
             try {
 
@@ -271,9 +295,6 @@ const main = async (argv) => {
 
                 const eventTitle = `${subject}${course}`
 
-                console.log('Using date')
-                console.log(firstDay.format('MMM D, YYYY HH:mm'))
-
                 const event = {
                     // Start is in the format [year, month, day, hour, min]
                     start: start,
@@ -293,9 +314,6 @@ const main = async (argv) => {
                     if (err) {
                         throw err
                     }
-
-                    // Standardize ics value to conform with ics spec
-                    // const newVal = val.replace(/\r\n/gm, "\n").replace(/\n/gm,   "\r\n")
 
                     // Set the file name
                     const fn = start.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
