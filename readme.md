@@ -10,29 +10,28 @@ This repo is a work in progress
 
 ```
 NAME
-
-    node-xls2ics        
-
+    node-xls2ics
+    
 DESCRIPTION
-
     Generate an iCalendar (.ics) files from a csv.
-
+    
     The following options are available:
-            
-        --input     REQUIRED. The path to the input csv. 
+    
+    --input     REQUIRED. The path to the input csv. 
+    
+    --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
+    
+    --to        REQUIRED. The ending date. Must be in ISO format YYYY-MM-DD.
 
-        --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
-        
-        --to        REQUIRED. The ending date. Must be in ISO format YYYY-MM-DD.
-    
-        --verbose   Run with verbose output.
-    
-        --docs      View the help docs (You're reading them! 🚀)
-        
-        
+    --verbose   Run with verbose output.
+
+    --docs      View the help docs (You're reading them! 🚀)
+
+
 CSV FORMAT
-
-    The input csv MUST have the following fields
+    The input csv MUST be in the following format
+    
+    TITLE, SUBJ, CRSE, INSTR1, INSTR2, INSTR1_EMAIL, INSTR2_EMAIL, DAYS1, DAYS2, TIME1, TIME2
 
     TITLE           The title of the event
     SUBJ            The course subject
@@ -51,5 +50,8 @@ CSV FORMAT
     
 EXAMPLE USAGE
     node src/index.js --input=/path/to/input.csv --from=2020-01-01 --to=2020-03-01 
+
+CAVEATS
+    Files will be saved to PROJECT_ROOT/output. This means the output folder must be created before usage.
 
 ```
