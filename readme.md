@@ -1,4 +1,4 @@
-# csv2ics
+# course2ics
 
 This script will transform a csv file into a number of ics events.
 
@@ -10,7 +10,7 @@ This repo is a work in progress
 
 ```
 NAME
-    node-xls2ics
+    course2ics
     
 DESCRIPTION
     Generate an iCalendar (.ics) files from a csv.

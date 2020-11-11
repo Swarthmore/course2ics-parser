@@ -25,7 +25,7 @@ const handleError = (message) => {
 if (argv.docs) {
     console.log(`
         NAME
-            node-xls2ics
+            course2ics
             
         DESCRIPTION
             Generate an iCalendar (.ics) files from a csv.

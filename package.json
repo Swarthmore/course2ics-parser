@@ -1,11 +1,11 @@
 {
-  "name": "csv2ics",
+  "name": "course2ics",
   "version": "0.0.1",
   "license": "MIT",
   "source": "src/index.js",
-  "main": "dist/csv2ics.js",
-  "module": "dist/csv2ics.module.js",
-  "unpkg": "dist/csv2ics.umd.js",
+  "main": "dist/course2ics.js",
+  "module": "dist/course2ics.module.js",
+  "unpkg": "dist/course2ics.umd.js",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch"
