@@ -1,0 +1,101 @@
+"TITLE","SUBJ","CRSE","INSTR1","INSTR2","INSTR1_EMAIL","INSTR2_EMAIL","DAYS1","DAYS2","TIME1","TIME2"
+"R:Fdns Chem Priniciples: Honor",CHEM,010,"Miller, Stephen",,smiller1@swarthmore.edu,,"T,R",U,"11:45 - 13:00","19:00 - 22:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Stephenson, Thomas","Burkhard, Caroline",tstephe1@swarthmore.edu,cburkha1@swarthmore.edu,M,M,"14:00 - 15:30","15:31 - 17:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Yatsunyk, Liliya","Sonntag, Lori",lyatsun1@swarthmore.edu,lsonnta1@swarthmore.edu,T,T,"14:00 - 15:30","15:31 - 17:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Gallagher, Maria","Sonntag, Lori",mgallag2@swarthmore.edu,lsonnta1@swarthmore.edu,R,R,"14:00 - 15:30","15:31 - 17:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Miller, Stephen","Burkhard, Caroline",smiller1@swarthmore.edu,cburkha1@swarthmore.edu,W,W,"14:00 - 15:30","15:31 - 17:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Riley, Kathryn","Sonntag, Lori",kriley1@swarthmore.edu,lsonnta1@swarthmore.edu,F,F,"15:00 - 16:30","16:31 - 18:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Gallagher, Maria","Sonntag, Lori",mgallag2@swarthmore.edu,lsonnta1@swarthmore.edu,R,R,"08:00 - 09:15","09:16 - 11:00"
+"R:Fdns of Chem Principle-Lab",CHEM,010,"Stephenson, Thomas","Ambruso, Kelly",tstephe1@swarthmore.edu,kambrus1@swarthmore.edu,T,T,"08:00 - 09:15","09:16 - 11:00"
+"R:Fdns of Chemical Principles",CHEM,010,"Stephenson, Thomas",,tstephe1@swarthmore.edu,,"M,W,F",U,"09:20 - 10:10","19:00 - 22:00"
+"R:Fdns of Chemical Principles",CHEM,010,"Stephenson, Thomas",,tstephe1@swarthmore.edu,,"M,W,F",U,"10:40 - 11:30","19:00 - 22:00"
+"R:Fdns of Chemical Principles",CHEM,010,"Riley, Kathryn",,kriley1@swarthmore.edu,,"M,W,F",U,"08:00 - 08:50","19:00 - 22:00"
+"R:Fdns of Chemical Principles",CHEM,010,"Riley, Kathryn",,kriley1@swarthmore.edu,,"M,W,F",U,"09:20 - 10:10","19:00 - 22:00"
+"R:Organic Chem II- Lab",CHEM,032,"Gallagher, Maria","Halley, Donna",mgallag2@swarthmore.edu,dhalley1@swarthmore.edu,F,F,"15:00 - 16:30","16:31 - 18:00"
+"R:Organic Chem II- Lab",CHEM,032,"Rablen, Paul","Halley, Donna",prablen1@swarthmore.edu,dhalley1@swarthmore.edu,W,W,"14:00 - 15:30","15:31 - 17:00"
+"R:Organic Chem II- Lab",CHEM,032,"Rablen, Paul","Halley, Donna",prablen1@swarthmore.edu,dhalley1@swarthmore.edu,R,R,"14:00 - 15:30","15:30 - 17:00"
+"R:Organic Chem II-Lab",CHEM,032,"Paley, Robert","Halley, Donna",rpaley1@swarthmore.edu,dhalley1@swarthmore.edu,M,M,"14:00 - 15:30","15:31 - 17:00"
+"R:Organic Chem II-Lab",CHEM,032,"Gallagher, Maria","Halley, Donna",mgallag2@swarthmore.edu,dhalley1@swarthmore.edu,T,T,"14:00 - 15:30","15:31 - 17:00"
+"R:Organic Chemistry II",CHEM,032,"Paley, Robert",,rpaley1@swarthmore.edu,,M,"M,W,F","09:00 - 12:00","09:20 - 10:10"
+"Biological Chemistry (BMC)",CHEM,038,STAFF,,,,,,,
+"R:Physical Chem-Atoms, Molecul",CHEM,044,"Howard, Kathleen",,khoward1@swarthmore.edu,,"T,R",,"08:00 - 09:15",
+"R:Physical Chem-Atoms- Lab",CHEM,044,"Howard, Kathleen","Ambruso, Kelly",khoward1@swarthmore.edu,kambrus1@swarthmore.edu,W,,"14:00 - 17:00",
+"R:Physical Chem-Atoms-Lab",CHEM,044,"Howard, Kathleen","Ambruso, Kelly",khoward1@swarthmore.edu,kambrus1@swarthmore.edu,R,,"14:00 - 17:00",
+"R:Biological Chemistry II",CHEM,048,"Barrett, Taylor",,tbarret1@swarthmore.edu,,"T,R",,"11:45 - 13:00",
+"R:Inorganic Chemistry",CHEM,056,"Yatsunyk, Liliya",,lyatsun1@swarthmore.edu,,"M,W,F",W,"10:40 - 11:30","19:00 - 22:00"
+"R:Computat'l/Experimntal Bio",CHEM,058B,"Barrett, Taylor","Van Aken, Thomas",tbarret1@swarthmore.edu,tvanake1@swarthmore.edu,"T,R","T,R","14:00 - 15:30","15:31 - 17:00"
+"H:Research Project",CHEM,094,STAFF,,,,,,,
+"R:Research Project",CHEM,094,"Riley, Kathryn",,kriley1@swarthmore.edu,,,,,
+"R:Research Project",CHEM,094,"Graves, Christopher",,cgraves1@swarthmore.edu,,,,,
+"R:Research Project",CHEM,094,"Yatsunyk, Liliya",,lyatsun1@swarthmore.edu,,,,,
+"H:Research Thesis",CHEM,096,STAFF,,,,,,,
+"H:Research Thesis",CHEM,096,"Yatsunyk, Liliya",,lyatsun1@swarthmore.edu,,,,,
+"R:Research Thesis",CHEM,096,"Stephenson, Thomas",,tstephe1@swarthmore.edu,,,,,
+"R:Tpcs in Phys Organic Chemist",CHEM,122,"Rablen, Paul",,prablen1@swarthmore.edu,,T,,"14:00 - 17:30",
+"H:Honors Research Thesis",CHEM,180,STAFF,,,,,,,
+"R:Honors Research Thesis",CHEM,180,"Graves, Christopher",,cgraves1@swarthmore.edu,,,,,
+"R:Senior Thesis Workshop",CHEM,199,"Stephenson, Thomas",,tstephe1@swarthmore.edu,,,,,
+"R:Senior Thesis Workshop",CHEM,199,"Stephenson, Thomas",,tstephe1@swarthmore.edu,,,,,
+"R:Intro to Mandarin",CHIN,001,"Kang, Wol A",,wkang1@swarthmore.edu,,"T,R",S,"11:45 - 13:00","19:00 - 22:00"
+"R:Intro to Mandarin",CHIN,001,"Kang, Wol A",,wkang1@swarthmore.edu,,"T,R",S,"09:45 - 11:00","19:00 - 22:00"
+"R:Intro to Mandarin- Drill",CHIN,001,"Speidel, Kirsten",,kspeide1@swarthmore.edu,,"M,W,F",,"12:15 - 13:05",
+"R:Intro to Mandarin- Drill",CHIN,001,"Speidel, Kirsten",,kspeide1@swarthmore.edu,,"M,W,F",,"10:40 - 11:30",
+"R:Intro to Mandarin-Drill",CHIN,001,"Speidel, Kirsten",,kspeide1@swarthmore.edu,,"M,W,F",,"09:20 - 10:10",
+"R:Second-Year Mandarin",CHIN,003,"Li, Claire",,cli3@swarthmore.edu,,"T,R",W,"08:00 - 09:15","09:00 - 12:00"
+"R:Second-Year Mandarin- Drill",CHIN,003,"Wen, Caiju",,cwen1@swarthmore.edu,,"M,W,F",,"09:20 - 10:10",
+"R:Second-Year Mandarin-Drill",CHIN,003,"Wen, Caiju",,cwen1@swarthmore.edu,,"M,W,F",,"10:40 - 11:30",
+"R:Chinese for Adv Beginners",CHIN,005,"Chiu, Ju-hui",,jchiu1@swarthmore.edu,,W,"T,R","09:00 - 12:00","11:45 - 13:05"
+"R:3rd Yr Chinese",CHIN,011,"Li, Claire",,cli3@swarthmore.edu,,S,"T,R","09:00 - 12:00","11:45 - 13:00"
+"R:3rd Yr Chinese Conversation",CHIN,011A,"Wen, Caiju",,cwen1@swarthmore.edu,,M,,"14:30 - 15:45",
+"R:Readings-Modern Chinese",CHIN,020,"Kong, Haili",,hkong1@swarthmore.edu,,"T,R",T,"08:00 - 09:15","09:00 - 12:00"
+"R:Appreciation of Tang-Song Po",CHIN,034,"Ridgway, Benjamin",,bridgwa1@swarthmore.edu,,W,"T,R","09:00 - 12:00","15:45 - 17:00"
+"R:Txt&Imge in ChinPoetry&Paint",CHIN,037,"Ridgway, Benjamin",,bridgwa1@swarthmore.edu,,T,"T,R","09:00 - 12:00","09:45 - 11:00"
+"R:DirRdg:Madarin Chinese",CHIN,093,"Kang, Wol A",,wkang1@swarthmore.edu,,,,,
+"R:Lu Xun&20C Chin Lit(1)",CHIN,103,"Kong, Haili",,hkong1@swarthmore.edu,,W,,"10:30 - 13:30",
+"R:Lu Xun&20C Chin Litr (2)",CHIN,103,"Kong, Haili",,hkong1@swarthmore.edu,,T,W,"09:00 - 12:00","10:30 - 13:30"
+"R:Senior Honors Study",CHIN,199,"Kong, Haili",,hkong1@swarthmore.edu,,M,,"14:00 - 16:00",
+"R:Radical Jesus (W)",CLST,004,"Wallace, Mark",,mwallac1@swarthmore.edu,,W,,"14:00 - 17:00",
+"R:Plato (W)",CLST,020,"Ledbetter, Grace",,gledbet1@swarthmore.edu,,W,,"14:00 - 17:00",
+"R:Readings in Sanskrit",CLST,022,"Khanna, Varun",,vkhanna1@swarthmore.edu,,M,,"18:30 - 21:30",
+"R:Introduction to Sanskrit",CLST,023,"Khanna, Varun",,vkhanna1@swarthmore.edu,,T,,"18:30 - 21:30",
+"R:Hebrew for Text Study II",CLST,059,"Plotkin, Helen",,hplotki1@swarthmore.edu,,T,"M,W,F","09:00 - 12:00","12:15 - 13:05"
+"R:Readings in Classical Hebrew",CLST,092,"Plotkin, Helen",,hplotki1@swarthmore.edu,,,,,
+"H:Intro to Cognitive Science",COGS,001,"Durgin, Frank",,fdurgin1@swarthmore.edu,,"T,R",,"08:00 - 09:15",
+"R:Senior Thesis",COGS,090,"Mitchell, Benjamin",,bmitche1@swarthmore.edu,,,,,
+"R:Senior Honors Thesis",COGS,180,"Gauthier, Jeffrey",,jgauthi2@swarthmore.edu,,,,,
+R:Thesis,CPLT,096,STAFF,,,,,,,
+"R:Intro to Computer Sci-Lab",CPSC,021,"Sinclair, Sara",,sbrody2@swarthmore.edu,,W,,"15:45 - 17:15",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Wicentowski, Richard",,rwicent1@swarthmore.edu,,W,,"15:45 - 17:15",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Sinclair, Sara",,sbrody2@swarthmore.edu,,W,,"20:15 - 21:45",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Meeden, Lisa",,lmeeden1@swarthmore.edu,,W,,"14:00 - 15:30",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Sinclair, Sara",,sbrody2@swarthmore.edu,,W,,"14:00 - 15:30",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Wicentowski, Richard",,rwicent1@swarthmore.edu,,W,,"14:00 - 15:30",
+"R:Intro to Computer Sci-Lab",CPSC,021,"Meeden, Lisa",,lmeeden1@swarthmore.edu,,W,,"09:00 - 10:30",
+"R:Intro to Computer Science",CPSC,021,"Meeden, Lisa","Wicentowski, Richard",lmeeden1@swarthmore.edu,rwicent1@swarthmore.edu,"T,R",R,"14:00 - 15:15","19:00 - 22:00"
+"R:Intro to Computer Science",CPSC,021,"Wicentowski, Richard","Meeden, Lisa",rwicent1@swarthmore.edu,lmeeden1@swarthmore.edu,"T,R",R,"09:45 - 11:00","19:00 - 22:00"
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Kazer, Charles",,ckazer1@swarthmore.edu,,F,,"09:00 - 10:30",
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Kazer, Charles",,ckazer1@swarthmore.edu,,F,,"15:00 - 16:30",
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Palmer, Zachary",,zpalmer2@swarthmore.edu,,F,,"15:00 - 16:30",
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Kazer, Charles",,ckazer1@swarthmore.edu,,R,,"13:05 - 14:35",
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Wehar, Michael",,mwehar1@swarthmore.edu,,R,,"14:45 - 16:15",
+"R:Data Struct/Algorithms-Lab",CPSC,035,"Kazer, Charles",,ckazer1@swarthmore.edu,,R,,"14:45 - 16:15",
+"R:Data Structures and Algorith",CPSC,035,"Palmer, Zachary",,zpalmer2@swarthmore.edu,,"T,R",,"09:45 - 11:00",
+"R:Data Structures and Algorith",CPSC,035,"Wehar, Michael",,mwehar1@swarthmore.edu,,"T,R",,"11:45 - 13:00",
+"R:Computer Graphics",CPSC,040,"Danner, Andrew",,adanner1@swarthmore.edu,,T,"M,W,F","09:00 - 12:00","10:40 - 11:30"
+"R:Computer Graphics-Lab",CPSC,040,"Danner, Andrew",,adanner1@swarthmore.edu,,M,,"15:00 - 16:30",
+"R:Computer Graphics-Lab",CPSC,040,"Danner, Andrew",,adanner1@swarthmore.edu,,M,,"13:15 - 14:45",
+R:Algorithms,CPSC,041,"Brody, Joshua",,jbrody1@swarthmore.edu,,W,"M,W,F","09:00 - 12:00","09:20 - 10:10"
+R:Algorithms-Lab,CPSC,041,"Brody, Joshua",,jbrody1@swarthmore.edu,,M,,"13:15 - 14:45",
+R:Algorithms-Lab,CPSC,041,"Brody, Joshua",,jbrody1@swarthmore.edu,,M,,"15:00 - 16:30",
+"R:Computer Networks",CPSC,043,"Chaganti, Vasanta",,vchagan1@swarthmore.edu,,"T,R",,"09:45 - 11:00",
+"R:Computer Networks- Lab",CPSC,043,"Chaganti, Vasanta",,vchagan1@swarthmore.edu,,F,,"16:30 - 18:00",
+"R:Computer Networks- Lab",CPSC,043,"Chaganti, Vasanta",,vchagan1@swarthmore.edu,,F,,"15:00 - 16:30",
+"R:Database Systems",CPSC,044,"Newhall, Tia",,tnewhal1@swarthmore.edu,,R,"T,R","09:00 - 12:00","11:45 - 13:00"
+"R:Database Systems-Lab",CPSC,044,"Soni, Ameet",,asoni1@swarthmore.edu,,W,,"13:15 - 14:45",
+"R:Database Systems-Lab",CPSC,044,"Newhall, Tia",,tnewhal1@swarthmore.edu,,W,,"13:15 - 14:45",
+"R:Database Systems-Lab",CPSC,044,"Newhall, Tia",,tnewhal1@swarthmore.edu,,W,,"15:00 - 16:30",
+"R:Artificial Intelligence",CPSC,063,"Mitchell, Benjamin",,bmitche1@swarthmore.edu,,F,"M,W,F","09:00 - 12:00","12:15 - 13:05"
+"R:Artificial Intelligence-Lab",CPSC,063,"Mitchell, Benjamin",,bmitche1@swarthmore.edu,,F,,"15:00 - 16:30",
+"R:Natural Lang. Processing-Lab",CPSC,065,"Caplan, Spencer",,scaplan1@swarthmore.edu,,W,,"15:00 - 16:30",
+"R:Natural Lang. Processing-Lab",CPSC,065,"Caplan, Spencer",,scaplan1@swarthmore.edu,,W,,"13:15 - 14:45",
+"R:Natural Language Processing",CPSC,065,"Caplan, Spencer",,scaplan1@swarthmore.edu,,R,"T,R","09:00 - 12:00","14:00 - 15:15"

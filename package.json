@@ -1,5 +1,5 @@
 {
-  "name": "course2ics",
+  "name": "@swarthmore/course2ics",
   "version": "0.0.1",
   "license": "MIT",
   "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
@@ -9,7 +9,8 @@
   "unpkg": "dist/course2ics.umd.js",
   "scripts": {
     "build": "microbundle",
-    "dev": "microbundle watch"
+    "dev": "microbundle watch",
+    "clean": "rm -rf output/**"
   },
   "dependencies": {
     "ics": "^2.26.1",
@@ -29,5 +30,8 @@
   "bugs": {
     "url": "https://github.com/Swarthmore/course2ics/issues"
   },
-  "homepage": "https://github.com/Swarthmore/course2ics"
+  "homepage": "https://github.com/Swarthmore/course2ics",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  }
 }
