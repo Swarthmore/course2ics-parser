@@ -184,10 +184,12 @@ const main = async (argv) => {
           }
 
           // Set the file name
-          const fn = `${title.replace(/^[0-9a-zA-Z ]+$/g, '')}_${days.replace(/,/g, '')}_${times.replace(/[:-\s]/g, '')}` + '.ics'
+          
+          const fn = `${title.replace(/[/\\?%*:|"<>]/g, '-')}_${days.replace(/,/g, '')}_${times.replace(/[:-\s]/g, '')}`
+          const ext = '.ics'
 
           // Set the filepath
-          const fp = `output/${fn}`
+          const fp = `output/${fn}${ext}`
 
           // Save the file
           await fs.writeFile(fp, val)
