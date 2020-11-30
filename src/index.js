@@ -184,7 +184,7 @@ const main = async (argv) => {
           }
 
           // Set the file name
-          const fn = start.join('-') + '_' + days.replace(/,/g, '') + '_' + times.replace(/[:-\s]/g, '') + '_' + subject + '-' + course + '.ics'
+          const fn = `${title.replace(/^[0-9a-zA-Z ]+$/g, '')}_${days.replace(/,/g, '')}_${times.replace(/[:-\s]/g, '')}` + '.ics'
 
           // Set the filepath
           const fp = `output/${fn}`
