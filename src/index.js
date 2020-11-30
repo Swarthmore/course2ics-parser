@@ -9,7 +9,7 @@ const Papa = require('papaparse')
 const ics = require('ics')
 const moment = require('moment')
 const { validateArgs, validateRow } = require('./validators')
-const { daysFromString, timeDiff, firstDayAfterDate } = require('./helpers')
+const { daysFromString, timeDiff, firstDayAfterDate, flipName } = require('./helpers')
 
 // See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
@@ -172,7 +172,7 @@ const main = async (argv) => {
           description: title,
           status: 'CONFIRMED',
           organizer: {
-            name: instr,
+            name: flipName(instr),
             email: email
           }
         }

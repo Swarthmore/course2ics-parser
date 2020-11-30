@@ -137,11 +137,23 @@ const firstDayAfterDate = (fromDate, days, times, moment) => {
   }
 }
 
+/**
+ * Returns FIRST LAST name
+ * @param {*} str - The name in the format of LAST, FIRST
+ */
+const flipName = (str) => {
+  const split = str.split(',')
+  const first = split[1].trim()
+  const last = split[0].trim()
+  return `${first} ${last}`
+}
+
 module.exports = {
   convertMS,
   firstDayAfterDate,
   daysFromString,
   dayToNum,
   timeDiff,
-  timeFromString
+  timeFromString,
+  flipName
 }
