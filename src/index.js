@@ -10,6 +10,8 @@ const ics = require('ics')
 const moment = require('moment')
 const { validateArgs, validateRow } = require('./validators')
 const { daysFromString, timeDiff, firstDayAfterDate, flipName } = require('./helpers')
+const path = require('path')
+const { docs } = require('./docs')
 
 // See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
@@ -19,54 +21,7 @@ moment.suppressDeprecationWarnings = true;
 
 // If --docs was passed as an argument, show the documentation, then end the process
 if (argv.docs) {
-  console.log(`
-        NAME
-            course2ics
-            
-        DESCRIPTION
-            Generate an iCalendar (.ics) files from a csv.
-            
-            The following options are available:
-            
-            --input     REQUIRED. The path to the input csv. 
-            
-            --from      REQUIRED. The starting date. Must be in ISO format YYYY-MM-DD. 
-            
-            --to        REQUIRED. The ending date. Must be in ISO format YYYY-MM-DD.
-
-            --verbose   Run with verbose output.
-        
-            --docs      View the help docs (You're reading them! 🚀)
-        
-        
-        CSV FORMAT
-            The input csv MUST be in the following format
-            
-            TITLE, SUBJ, CRSE, INSTR1, INSTR2, INSTR1_EMAIL, INSTR2_EMAIL, DAYS1, DAYS2, TIME1, TIME2
-
-            TITLE           The title of the event
-            SUBJ            The course subject
-            CRSE            The course number
-            INSTR1          The full name of the primary instructor, in the format Last, First
-            INSTR2          The full name of the secondary instructor, in the format Last, First
-                            This field may also be blank
-            INSTR1_EMAIL    The email address of the primary instructor
-            INSTR2_EMAIL    The email address of the secondary instructor
-            DAYS1           A comma delimited set of days when the event happens.
-                            M = Monday, T = Tuesday, W = Wednesday, Th = Thursday, F = Friday, S = Saturday, Su = Sunday
-                            Ex: M,T,W,Th,F
-            DAYS2           A comma delimited set of days when the event happens. This second set is optional.
-            TIME1           The time for when the events defined in DAYS1 occur, in the format of HH-DD (24 hours)
-            TIME2           The time for when the events defined in DAYS2 occur, in the format of HH-DD (24 hours)
-            
-        EXAMPLE USAGE
-            node src/index.js --input=/path/to/input.csv --from=2020-01-01 --to=2020-03-01 
-        
-        CAVEATS
-            Files will be saved to PROJECT_ROOT/output. This means the output folder must be created before usage.
-            
-    `)
-
+  console.log(docs())
   process.exit()
 }
 
@@ -88,11 +43,18 @@ const main = async (argv) => {
   // Validate the arguments
   validateArgs(argv)
 
-  // Create the file path
-  const fp = `${__dirname}/${argv.input}`
+  // Set the output directory based on the arguments provided
+  const outputDir = path.normalize(argv.output)
+
+  debugMessage(`Output dir: ${outputDir}`)
+
+  // Set the input directory based on the arguments provided
+  const inputFp = path.normalize(argv.input)
+
+  debugMessage(`Input file: ${inputFp}`)
 
   // Read the CSV
-  const file = await fs.readFile(fp, 'utf8')
+  const file = await fs.readFile(inputFp, 'utf8')
 
   // Handle the processing of a single row of data
   const processRow = async (row) => {
@@ -106,7 +68,7 @@ const main = async (argv) => {
     }
 
     // destructure everything out of the row
-    const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2] = row
+    const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row
 
     /**
      * Creates a single ics file
@@ -161,7 +123,7 @@ const main = async (argv) => {
         // second part (the part we need) to a variable.
         const [, recurrenceRule] = rrule.toString().split('RRULE:')
 
-        const eventTitle = `${subject}${course}`
+        const eventTitle = `${subject} ${course} ${section}`
 
         const event = {
           // Start is in the format [year, month, day, hour, min]
@@ -184,12 +146,11 @@ const main = async (argv) => {
           }
 
           // Set the file name
-          
-          const fn = `${title.replace(/[/\\?%*:|"<>]/g, '-')}_${days.replace(/,/g, '')}_${times.replace(/[:-\s]/g, '')}`
+          const fn = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}_${section}_${days.replace(/,/g, '')}_${times.replace(/[:-\s]/g, '')}`
           const ext = '.ics'
 
           // Set the filepath
-          const fp = `output/${fn}${ext}`
+          const fp = `${outputDir}/${fn}${ext}`
 
           // Save the file
           await fs.writeFile(fp, val)

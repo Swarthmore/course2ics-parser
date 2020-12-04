@@ -1,1 +1,0 @@
-This folder contains chunks of csv data from `report.csv`

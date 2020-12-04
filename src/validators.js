@@ -17,6 +17,9 @@ exports.validateArgs = (argv) => {
     throw new Error('--to is missing')
   }
 
+  if (!argv.output) {
+      throw new Error('--output is missing')
+  }
 }
 
 /**
@@ -28,7 +31,7 @@ exports.validateArgs = (argv) => {
 exports.validateRow = (row) => {
   let valid = true
 
-  const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2] = row
+  const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row
 
   if (!title) {
     valid = false
@@ -43,6 +46,10 @@ exports.validateRow = (row) => {
   }
 
   if (!time1) {
+    valid = false
+  }
+
+  if (!section) {
     valid = false
   }
 

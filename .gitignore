@@ -1,4 +1,7 @@
 .DS_Store
+testdata/
+output/
+dist/
 
 # Logs
 logs
