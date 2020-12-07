@@ -1,6 +1,6 @@
 {
   "name": "course2ics-parser",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
   "source": "src/index.js",

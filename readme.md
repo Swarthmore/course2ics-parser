@@ -10,12 +10,12 @@ This repo is a work in progress
 
 ### Installation
 ```
-npm i @swarthmore/course2ics-parser
+npm i course2ics-parser
 ```
 
 #### Quick start
 ```javascript
-const { parse } = require('@swarthmore/course2ics-parser')
+const { parse } = require('course2ics-parser')
 
 (async () => {
 
