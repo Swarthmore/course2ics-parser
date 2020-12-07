@@ -1,24 +1,22 @@
 {
-  "name": "course2ics",
+  "name": "@swarthmore/course2ics-parser",
   "version": "0.0.1",
   "license": "MIT",
   "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
   "source": "src/index.js",
-  "main": "dist/course2ics.js",
-  "module": "dist/course2ics.module.js",
-  "unpkg": "dist/course2ics.umd.js",
+  "main": "dist/course2ics-parser.js",
+  "module": "dist/course2ics-parser.module.js",
+  "unpkg": "dist/course2ics-parser.umd.js",
   "scripts": {
-    "build": "microbundle",
-    "dev": "microbundle watch",
-    "clean": "rm -rf output/**"
+    "build": "microbundle src/*.js --target node",
+    "dev": "microbundle watch --target node"
   },
   "dependencies": {
     "ics": "^2.26.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "papaparse": "^5.3.0",
-    "rrule": "^2.6.6",
-    "yargs": "^16.1.0"
+    "rrule": "^2.6.6"
   },
   "devDependencies": {
     "microbundle": "^0.12.4"

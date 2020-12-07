@@ -1,17 +1,11 @@
-#!/usr/bin/env node
-
 const { RRule } = require('rrule')
-const yargs = require('yargs/yargs')
-const { hideBin } = require('yargs/helpers')
 const fs = require('fs').promises
-const argv = yargs(hideBin(process.argv)).argv
 const Papa = require('papaparse')
 const ics = require('ics')
 const moment = require('moment')
 const { validateArgs, validateRow } = require('./validators')
 const { daysFromString, timeDiff, firstDayAfterDate, flipName } = require('./helpers')
 const path = require('path')
-const { docs } = require('./docs')
 
 // See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
@@ -19,37 +13,32 @@ moment().format()
 // See: https://github.com/moment/moment/issues/3488
 moment.suppressDeprecationWarnings = true;
 
-// If --docs was passed as an argument, show the documentation, then end the process
-if (argv.docs) {
-  console.log(docs())
-  process.exit()
-}
-
-// Output a debug message. This will only work if --verbose is passed to the script
-const debugMessage = (message) => {
-  if (!argv.verbose) return
-  console.debug(
-    typeof message === 'string' ? message : JSON.stringify(message)
-  )
-}
 
 /**
  * The main function
  * @param argv - Arguments - See docs
  * @returns {Promise<void>}
  */
-const main = async (argv) => {
+const parse = async (argv) => {
+
+  // Output a debug message. This will only work if --verbose is passed to the script
+  const debugMessage = (message) => {
+    if (!argv.verbose) return
+    console.debug(
+      typeof message === 'string' ? message : JSON.stringify(message)
+    )
+  }
 
   // Validate the arguments
   validateArgs(argv)
 
   // Set the output directory based on the arguments provided
-  const outputDir = path.normalize(argv.output)
+  const outputDir = path.normalize(argv.outputDir)
 
   debugMessage(`Output dir: ${outputDir}`)
 
   // Set the input directory based on the arguments provided
-  const inputFp = path.normalize(argv.input)
+  const inputFp = path.normalize(argv.inputFile)
 
   debugMessage(`Input file: ${inputFp}`)
 
@@ -106,10 +95,10 @@ const main = async (argv) => {
             }
           })
             .filter(day => day),
-          until: new Date(argv.to)
+          until: new Date(argv.toDate)
         })
 
-        const firstDay = firstDayAfterDate(argv.from, days, times, moment)
+        const firstDay = firstDayAfterDate(argv.fromDate, days, times, moment)
 
         if (!firstDay) return
 
@@ -198,8 +187,4 @@ const main = async (argv) => {
 
 }
 
-// Run the script
-(async () => {
-  await main(argv)
-  return 0
-})()
+module.exports = { parse }
