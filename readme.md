@@ -1,4 +1,4 @@
-# course2ics
+# course2ics-parser
 
 This script will transform a csv file into a number of ics events.
 

@@ -1,6 +1,6 @@
 {
   "name": "@swarthmore/course2ics-parser",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
   "source": "src/index.js",
@@ -23,13 +23,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Swarthmore/course2ics.git"
+    "url": "https://github.com/Swarthmore/course2ics-parser.git"
   },
   "bugs": {
-    "url": "https://github.com/Swarthmore/course2ics/issues"
+    "url": "https://github.com/Swarthmore/course2ics-parser/issues"
   },
-  "homepage": "https://github.com/Swarthmore/course2ics",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+  "homepage": "https://github.com/Swarthmore/course2ics-parser"
 }
