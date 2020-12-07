@@ -5,19 +5,19 @@
  */
 exports.validateArgs = (argv) => {
 
-  if (!argv.input) {
+  if (!argv.inputFile) {
     throw new Error('--input is missing')
   }
 
-  if (!argv.from) {
+  if (!argv.fromDate) {
     throw new Error('--from is missing')
   }
 
-  if (!argv.to) {
+  if (!argv.toDate) {
     throw new Error('--to is missing')
   }
 
-  if (!argv.output) {
+  if (!argv.outputDir) {
       throw new Error('--output is missing')
   }
 }

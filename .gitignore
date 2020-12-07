@@ -1,7 +1,7 @@
 .DS_Store
 testdata/
 output/
-dist/
+local/
 
 # Logs
 logs
