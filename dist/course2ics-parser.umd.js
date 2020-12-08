@@ -33,12 +33,20 @@
 
   moment.suppressDeprecationWarnings = true;
   /**
-   * The main function
-   * @param argv - Arguments - See docs
+   * Parses a csv and creates an ics file for each row. The generated ics will contain events recurring weekly from
+   * the given fromDate until the given toDate.
+   *  
+   * @param {Object}  argv - The function arguments
+   * @param {boolean} argv.verbose - Runs the function in verbose mode
+   * @param {string}  argv.outputDir - The directory to save the files to. This directory must exist.
+   * @param {string}  argv.inputFile - The input csv
+   * @param {string}  argv.toDate - The starting date
+   * @param {string}  argv.fromDate - The end date
+   * 
    * @returns {Promise<void>}
    */
 
-  const parse = async argv => {
+  async function parse(argv) {
     // Output a debug message. This will only work if --verbose is passed to the script
     const debugMessage = message => {
       if (!argv.verbose) return;
@@ -179,7 +187,7 @@
     Papa.parse(file, {
       complete: results => handleResults(results)
     });
-  };
+  }
 
   module.exports = {
     parse
