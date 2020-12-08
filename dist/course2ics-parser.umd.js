@@ -203,7 +203,9 @@
 
     Papa.parse(csv, {
       complete: async results => {
-        // Get the rows from papa parse
+        // keep track of the created files, along with the source row
+        let created = []; // Get the rows from papa parse
+
         const rows = results.data.slice(1);
         let i = 0;
         var _iteratorNormalCompletion = true;
@@ -220,13 +222,8 @@
               debugMessage(`Processing row ${i}`);
               debugMessage(r); // validate the row
 
-              const isValid = validateRow(r);
-              const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = r; // if the row is not valid, return out of the function 
-
-              if (!isValid) {
-                throw new Error('Provided data is not valid');
-              }
-
+              const row = await validateRow(r);
+              const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row;
               const ics1 = await createIcsEvent({
                 title,
                 subject,
@@ -245,6 +242,19 @@
               const fp1 = path.join(outputDir, fn1 + ext);
               const f1 = await writeIcsToDisk(ics1, fp1);
               debugMessage('Created' + ' ' + f1);
+              created.push({
+                title,
+                subject,
+                course,
+                section,
+                instructor: instr1,
+                email: email1,
+                days: days1,
+                times: time1,
+                fromDate: args.fromDate,
+                toDate: args.toDate,
+                filename: f1
+              });
 
               if (days2 && time2) {
                 const ics2 = await createIcsEvent({
@@ -263,13 +273,27 @@
                 const fp2 = path.join(outputDir, fn2 + ext);
                 const f2 = await writeIcsToDisk(ics2, fp2);
                 debugMessage('Created' + ' ' + f2);
+                created.push({
+                  title,
+                  subject,
+                  course,
+                  section,
+                  instructor: instr1,
+                  email: email1,
+                  days: days2,
+                  times: time2,
+                  fromDate: args.fromDate,
+                  toDate: args.toDate,
+                  filename: f2
+                });
               }
             } catch (e) {
               console.error(e);
             } finally {
               i++;
             }
-          }
+          } // once everything is done processing, create the index json file
+
         } catch (err) {
           _didIteratorError = true;
           _iteratorError = err;
@@ -284,6 +308,9 @@
             }
           }
         }
+
+        await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8');
+        console.log('Done!');
       }
     });
   }
