@@ -9,7 +9,7 @@
   "unpkg": "dist/course2ics-parser.umd.js",
   "scripts": {
     "build": "microbundle src/*.js --target node",
-    "build:watch": "microbundle watch --target node"
+    "build:watch": "microbundle watch src/*.js --target node"
   },
   "dependencies": {
     "ics": "^2.26.1",
