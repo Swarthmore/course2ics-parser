@@ -1,57 +1,57 @@
 /**
  * Validates script arguments. It will throw an error if a required argument is not provided.
  * @param {*} argv 
- * @returns void 
+ * @returns {Promise<*>} - Returns a promise that resolves in the provided arguments
  */
-exports.validateArgs = argv => {
+exports.validateArgs = argv => new Promise((resolve, reject) => {
   if (!argv.inputFile) {
-    throw new Error('--input is missing');
+    reject('--input is missing');
   }
 
   if (!argv.fromDate) {
-    throw new Error('--from is missing');
+    reject('--from is missing');
   }
 
   if (!argv.toDate) {
-    throw new Error('--to is missing');
+    reject('--to is missing');
   }
 
   if (!argv.outputDir) {
-    throw new Error('--output is missing');
+    reject('--output is missing');
   }
-};
+
+  resolve(argv);
+});
 /**
  * Validates row data
- *  
- * @param  row 
- * @returns Boolean - Returns true if the row is valid or false if it is not
+ * @param {string[]} row - The row to validate
+ * @returns {Promise<string[]>} - Returns a promise that resolves with the provided row
  */
 
 
-exports.validateRow = row => {
-  let valid = true;
+exports.validateRow = row => new Promise((resolve, reject) => {
   const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row;
 
   if (!title) {
-    valid = false;
+    reject('Title is missing');
   }
 
   if (!email1) {
-    valid = false;
+    reject('Email1 is missing');
   }
 
   if (!days1) {
-    valid = false;
+    reject('Days1 is missing');
   }
 
   if (!time1) {
-    valid = false;
+    reject('Time1 is missing');
   }
 
   if (!section) {
-    valid = false;
+    reject('Section is missing');
   }
 
-  return valid;
-};
+  resolve(row);
+});
 //# sourceMappingURL=validators.module.js.map
