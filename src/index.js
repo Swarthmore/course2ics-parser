@@ -7,8 +7,6 @@ const { validateArgs, validateRow } = require('./validators')
 const { daysFromString, timeDiff, firstDayAfterDate, flipName } = require('./helpers')
 const path = require('path')
 
-// readCsvFunction -> papaParseCsv -> for each row, create an ics file -> if processed successfully, add row and filepath to index json -> once all rows are processed, resolve a promise with the index json and output directory
-
 // See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
 
@@ -129,7 +127,6 @@ async function parse(argv) {
       }
     }
 
-
     return new Promise((resolve, reject) => {
       ics.createEvent(event, (err, val) => {
         if (err) reject(err)
@@ -156,83 +153,59 @@ async function parse(argv) {
 
   /**
    * Runs the parser
-   * @return {Promise<void>}
+   * @return {Promise<{ title: string; subject: string; course: string; section: string; instructor: string; email: string; days: string; times: string; fromDate: any; toDate: any; filename: string; }[]>} - Returns a promise that resolves with the created files
    */
   async function runParser() {
-    Papa.parse(csv, {
-      complete: async results => {
 
-        // keep track of the created files, along with the source row
-        let created = []
+    return new Promise((resolve, reject) => {
 
-        // Get the rows from papa parse
-        const rows = results.data.slice(1)
-        let i = 0
+      Papa.parse(csv, {
+        complete: async results => {
 
-        for await (let r of rows) {
+          // keep track of the created files, along with the source row
+          let created = []
 
-          try {
-            debugMessage('-------------------------------------------')
-            debugMessage(`Processing row ${i}`)
-            debugMessage(r)
+          // Get the rows from papa parse
+          const rows = results.data.slice(1)
 
-            // validate the row
-            const row = await validateRow(r)
+          if (rows.length === 0) {
+            reject('No rows could be parsed from csv')
+          }
 
-            const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row
+          let i = 0
 
-            const ics1 = await createIcsEvent({
-              title,
-              subject,
-              course,
-              section,
-              instructor: instr1,
-              email: email1,
-              days: days1,
-              times: time1,
-              fromDate: args.fromDate,
-              toDate: args.toDate
-            })
+          for await (let r of rows) {
 
-            // Set the file name
-            const fn1 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days1.replace(/,/g, '')}__${time1.replace(/[:-\s]/g, '')}`
-            const ext = '.ics'
+            try {
+              debugMessage('-------------------------------------------')
+              debugMessage(`Processing row ${i}`)
+              debugMessage(r)
 
-            const fp1 = path.join(outputDir, fn1 + ext)
-            const f1 = await writeIcsToDisk(ics1, fp1)
-            debugMessage('Created' + ' ' + f1)
+              // validate the row
+              const row = await validateRow(r)
 
-            created.push({
-              title,
-              subject,
-              course,
-              section,
-              instructor: instr1,
-              email: email1,
-              days: days1,
-              times: time1,
-              fromDate: args.fromDate,
-              toDate: args.toDate,
-              filename: f1
-            })
+              const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row
 
-            if (days2 && time2) {
-              const ics2 = await createIcsEvent({
+              const ics1 = await createIcsEvent({
                 title,
                 subject,
                 course,
                 section,
                 instructor: instr1,
                 email: email1,
-                days: days2,
-                times: time2,
+                days: days1,
+                times: time1,
                 fromDate: args.fromDate,
                 toDate: args.toDate
               })
-              const fn2 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days2.replace(/,/g, '')}__${time2.replace(/[:-\s]/g, '')}`
-              const fp2 = path.join(outputDir, fn2 + ext)
-              const f2 = await writeIcsToDisk(ics2, fp2)
-              debugMessage('Created' + ' ' + f2)
+
+              // Set the file name
+              const fn1 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days1.replace(/,/g, '')}__${time1.replace(/[:-\s]/g, '')}`
+              const ext = '.ics'
+
+              const fp1 = path.join(outputDir, fn1 + ext)
+              const f1 = await writeIcsToDisk(ics1, fp1)
+              debugMessage('Created' + ' ' + f1)
 
               created.push({
                 title,
@@ -241,30 +214,66 @@ async function parse(argv) {
                 section,
                 instructor: instr1,
                 email: email1,
-                days: days2,
-                times: time2,
+                days: days1,
+                times: time1,
                 fromDate: args.fromDate,
                 toDate: args.toDate,
-                filename: f2
+                filename: f1
               })
+
+              if (days2 && time2) {
+                const ics2 = await createIcsEvent({
+                  title,
+                  subject,
+                  course,
+                  section,
+                  instructor: instr1,
+                  email: email1,
+                  days: days2,
+                  times: time2,
+                  fromDate: args.fromDate,
+                  toDate: args.toDate
+                })
+                const fn2 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days2.replace(/,/g, '')}__${time2.replace(/[:-\s]/g, '')}`
+                const fp2 = path.join(outputDir, fn2 + ext)
+                const f2 = await writeIcsToDisk(ics2, fp2)
+                debugMessage('Created' + ' ' + f2)
+
+                created.push({
+                  title,
+                  subject,
+                  course,
+                  section,
+                  instructor: instr1,
+                  email: email1,
+                  days: days2,
+                  times: time2,
+                  fromDate: args.fromDate,
+                  toDate: args.toDate,
+                  filename: f2
+                })
+              }
+
+            } catch (e) {
+              debugMessage(e)
+            } finally {
+              i++
             }
 
-          } catch (e) {
-            console.error(e)
-          } finally {
-            i++
           }
 
+          // once everything is done processing, create the index json file
+          await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8')
+
+          debugMessage('Done!')
+
+          resolve(created)
+
         }
+      })
 
-        // once everything is done processing, create the index json file
-        await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8')
-
-        debugMessage('Done!')
-
-        return
-      }
     })
+
   }
 
   // Validate the arguments
@@ -276,7 +285,7 @@ async function parse(argv) {
   // Read the CSV
   const csv = await readCsv(path.normalize(args.inputFile))
 
-  return await runParser()
+  return runParser()
 
 }
 
