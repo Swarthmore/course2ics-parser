@@ -192,87 +192,55 @@
       } catch (e) {
         return e;
       }
-    } // Validate the arguments
+    }
+    /**
+     * Runs the parser
+     * @return {Promise<void>}
+     */
 
 
-    const args = await validateArgs(argv); // Set the output directory based on the arguments provided
+    async function runParser() {
+      Papa.parse(csv, {
+        complete: async results => {
+          // keep track of the created files, along with the source row
+          let created = []; // Get the rows from papa parse
 
-    const outputDir = path.normalize(args.outputDir); // Read the CSV
+          const rows = results.data.slice(1);
+          let i = 0;
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
 
-    const csv = await readCsv(path.normalize(args.inputFile)); // Use the papa to parse the file 🍕
+          var _iteratorError;
 
-    Papa.parse(csv, {
-      complete: async results => {
-        // keep track of the created files, along with the source row
-        let created = []; // Get the rows from papa parse
+          try {
+            for (var _iterator = _asyncIterator(rows), _step, _value; _step = await _iterator.next(), _iteratorNormalCompletion = _step.done, _value = await _step.value, !_iteratorNormalCompletion; _iteratorNormalCompletion = true) {
+              let r = _value;
 
-        const rows = results.data.slice(1);
-        let i = 0;
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
+              try {
+                debugMessage('-------------------------------------------');
+                debugMessage(`Processing row ${i}`);
+                debugMessage(r); // validate the row
 
-        var _iteratorError;
-
-        try {
-          for (var _iterator = _asyncIterator(rows), _step, _value; _step = await _iterator.next(), _iteratorNormalCompletion = _step.done, _value = await _step.value, !_iteratorNormalCompletion; _iteratorNormalCompletion = true) {
-            let r = _value;
-
-            try {
-              debugMessage('-------------------------------------------');
-              debugMessage(`Processing row ${i}`);
-              debugMessage(r); // validate the row
-
-              const row = await validateRow(r);
-              const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row;
-              const ics1 = await createIcsEvent({
-                title,
-                subject,
-                course,
-                section,
-                instructor: instr1,
-                email: email1,
-                days: days1,
-                times: time1,
-                fromDate: args.fromDate,
-                toDate: args.toDate
-              }); // Set the file name
-
-              const fn1 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days1.replace(/,/g, '')}__${time1.replace(/[:-\s]/g, '')}`;
-              const ext = '.ics';
-              const fp1 = path.join(outputDir, fn1 + ext);
-              const f1 = await writeIcsToDisk(ics1, fp1);
-              debugMessage('Created' + ' ' + f1);
-              created.push({
-                title,
-                subject,
-                course,
-                section,
-                instructor: instr1,
-                email: email1,
-                days: days1,
-                times: time1,
-                fromDate: args.fromDate,
-                toDate: args.toDate,
-                filename: f1
-              });
-
-              if (days2 && time2) {
-                const ics2 = await createIcsEvent({
+                const row = await validateRow(r);
+                const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row;
+                const ics1 = await createIcsEvent({
                   title,
                   subject,
                   course,
                   section,
                   instructor: instr1,
                   email: email1,
-                  days: days2,
-                  times: time2,
+                  days: days1,
+                  times: time1,
                   fromDate: args.fromDate,
                   toDate: args.toDate
-                });
-                const fn2 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days2.replace(/,/g, '')}__${time2.replace(/[:-\s]/g, '')}`;
-                const fp2 = path.join(outputDir, fn2 + ext);
-                const f2 = await writeIcsToDisk(ics2, fp2);
-                debugMessage('Created' + ' ' + f2);
+                }); // Set the file name
+
+                const fn1 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days1.replace(/,/g, '')}__${time1.replace(/[:-\s]/g, '')}`;
+                const ext = '.ics';
+                const fp1 = path.join(outputDir, fn1 + ext);
+                const f1 = await writeIcsToDisk(ics1, fp1);
+                debugMessage('Created' + ' ' + f1);
                 created.push({
                   title,
                   subject,
@@ -280,39 +248,80 @@
                   section,
                   instructor: instr1,
                   email: email1,
-                  days: days2,
-                  times: time2,
+                  days: days1,
+                  times: time1,
                   fromDate: args.fromDate,
                   toDate: args.toDate,
-                  filename: f2
+                  filename: f1
                 });
-              }
-            } catch (e) {
-              console.error(e);
-            } finally {
-              i++;
-            }
-          } // once everything is done processing, create the index json file
 
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return != null) {
-              await _iterator.return();
-            }
+                if (days2 && time2) {
+                  const ics2 = await createIcsEvent({
+                    title,
+                    subject,
+                    course,
+                    section,
+                    instructor: instr1,
+                    email: email1,
+                    days: days2,
+                    times: time2,
+                    fromDate: args.fromDate,
+                    toDate: args.toDate
+                  });
+                  const fn2 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days2.replace(/,/g, '')}__${time2.replace(/[:-\s]/g, '')}`;
+                  const fp2 = path.join(outputDir, fn2 + ext);
+                  const f2 = await writeIcsToDisk(ics2, fp2);
+                  debugMessage('Created' + ' ' + f2);
+                  created.push({
+                    title,
+                    subject,
+                    course,
+                    section,
+                    instructor: instr1,
+                    email: email1,
+                    days: days2,
+                    times: time2,
+                    fromDate: args.fromDate,
+                    toDate: args.toDate,
+                    filename: f2
+                  });
+                }
+              } catch (e) {
+                console.error(e);
+              } finally {
+                i++;
+              }
+            } // once everything is done processing, create the index json file
+
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
           } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
+            try {
+              if (!_iteratorNormalCompletion && _iterator.return != null) {
+                await _iterator.return();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
             }
           }
-        }
 
-        await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8');
-        console.log('Done!');
-      }
-    });
+          await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8');
+          debugMessage('Done!');
+          return;
+        }
+      });
+    } // Validate the arguments
+
+
+    const args = await validateArgs(argv); // Set the output directory based on the arguments provided
+
+    const outputDir = path.normalize(args.outputDir); // Read the CSV
+
+    const csv = await readCsv(path.normalize(args.inputFile));
+    return await runParser();
   }
 
   module.exports = {
