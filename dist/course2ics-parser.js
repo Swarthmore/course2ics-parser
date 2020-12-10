@@ -1,2 +1,356 @@
-const{RRule:e}=require("rrule"),t=require("fs").promises,r=require("papaparse"),a=require("ics"),i=require("moment"),{validateArgs:n,validateRow:s}=require("./validators"),{daysFromString:o,timeDiff:c,firstDayAfterDate:u,flipName:l}=require("./helpers"),f=require("path");i().format(),i.suppressDeprecationWarnings=!0,module.exports={parse:async function(m){const y=e=>{m.verbose&&console.debug("string"==typeof e?e:JSON.stringify(e))};async function w({title:t,subject:r,course:n,section:s,instructor:f,email:m,days:y,times:w,fromDate:d,toDate:D}){const b=o(y),p=new e({freq:e.WEEKLY,byweekday:b.map(t=>{switch(t){case"U":return e.SU;case"M":return e.MO;case"T":return e.TU;case"W":return e.WE;case"R":return e.TH;case"F":return e.FR;case"S":return e.SA}}).filter(e=>e),until:new Date(D)}),g=u(d,y,w,i).format("YYYY-M-D-H-m").split("-"),$=c(w),[,_]=p.toString().split("RRULE:"),h={start:g,duration:$,recurrenceRule:_,title:`${r} ${n} ${s}`,description:t,status:"CONFIRMED",organizer:{name:l(f),email:m}};return new Promise((e,t)=>{a.createEvent(h,(r,a)=>{r&&t(r),e(a)})})}async function d(e,r){try{return await t.writeFile(r,e),r}catch(e){return e}}const D=await n(m),b=f.normalize(D.outputDir),p=await async function(e){try{return await t.readFile(e,"utf8")}catch(e){return e}}(f.normalize(D.inputFile));return async function(){return new Promise((e,a)=>{r.parse(p,{complete:async r=>{let i=[];const n=r.data.slice(1);0===n.length&&a("No rows could be parsed from csv");let o=0;var c,u=!0,l=!1;try{for(var m,p,g=function(e){var t;if("undefined"!=typeof Symbol){if(Symbol.asyncIterator&&null!=(t=e[Symbol.asyncIterator]))return t.call(e);if(Symbol.iterator&&null!=(t=e[Symbol.iterator]))return t.call(e)}throw new TypeError("Object is not async iterable")}(n);u=(m=await g.next()).done,p=await m.value,!u;u=!0){let e=p;try{y("-------------------------------------------"),y("Processing row "+o),y(e);const t=await s(e),[r,a,n,c,u,l,m,p,g,$,_,h]=t,q=await w({title:r,subject:a,course:n,section:h,instructor:c,email:l,days:p,times:$,fromDate:D.fromDate,toDate:D.toDate}),S=`${r.replace(/[/\\?%*:|"<>\s]/g,"-")}__${h}_${p.replace(/,/g,"")}__${$.replace(/[:-\s]/g,"")}`,R=".ics",j=f.join(b,S+R),v=await d(q,j);if(y("Created "+v),i.push({title:r,subject:a,course:n,section:h,instructor:c,email:l,days:p,times:$,fromDate:D.fromDate,toDate:D.toDate,filename:v}),g&&_){const e=await w({title:r,subject:a,course:n,section:h,instructor:c,email:l,days:g,times:_,fromDate:D.fromDate,toDate:D.toDate}),t=`${r.replace(/[/\\?%*:|"<>\s]/g,"-")}__${h}_${g.replace(/,/g,"")}__${_.replace(/[:-\s]/g,"")}`,s=f.join(b,t+R),o=await d(e,s);y("Created "+o),i.push({title:r,subject:a,course:n,section:h,instructor:c,email:l,days:g,times:_,fromDate:D.fromDate,toDate:D.toDate,filename:o})}}catch(e){y(e)}finally{o++}}}catch(e){l=!0,c=e}finally{try{u||null==g.return||await g.return()}finally{if(l)throw c}}await t.writeFile(b+"/index.json",JSON.stringify(i),"utf8"),y("Done!"),e(i)}})})}()}};
+function _asyncIterator(iterable) {
+  var method;
+
+  if (typeof Symbol !== "undefined") {
+    if (Symbol.asyncIterator) {
+      method = iterable[Symbol.asyncIterator];
+      if (method != null) return method.call(iterable);
+    }
+
+    if (Symbol.iterator) {
+      method = iterable[Symbol.iterator];
+      if (method != null) return method.call(iterable);
+    }
+  }
+
+  throw new TypeError("Object is not async iterable");
+}
+
+const {
+  RRule
+} = require('rrule');
+
+const fs = require('fs').promises;
+
+const Papa = require('papaparse');
+
+const ics = require('ics');
+
+const moment = require('moment');
+
+const {
+  validateArgs,
+  validateRow
+} = require('./validators');
+
+const {
+  daysFromString,
+  timeDiff,
+  firstDayAfterDate,
+  flipName
+} = require('./helpers');
+
+const path = require('path');
+
+const pug = require('pug'); // See: https://momentjs.com/docs/#/use-it/node-js/
+
+
+moment().format(); // See: https://github.com/moment/moment/issues/3488
+
+moment.suppressDeprecationWarnings = true;
+
+async function makeSite(outputDir) {
+  // Get the files json file in the directory
+  const files = await fs.readdir(outputDir);
+  const [index] = files.filter(file => path.extname(file) === '.json');
+
+  if (!index) {
+    throw new Error('No index file found');
+  } // Get the file contents of index json
+
+
+  const json = await fs.readFile(path.join(outputDir, index)); // If the index file exists, create the file using the template
+
+  const compiledFunction = pug.compileFile(path.join(process.cwd(), 'src', 'templates', 'report.pug'));
+  const html = compiledFunction({
+    results: json
+  }); // Write index.html to the output directory
+
+  await fs.writeFile(path.join(outputDir, 'index.html'), html, 'utf8');
+}
+/**
+ * Parses a csv and creates an ics file for each row. The generated ics will contain events recurring weekly from
+ * the given fromDate until the given toDate.
+ *  
+ * @param {Object}  argv - The function arguments
+ * @param {boolean} argv.verbose - Runs the function in verbose mode
+ * @param {string}  argv.outputDir - The directory to save the files to. This directory must exist.
+ * @param {string}  argv.inputFile - The input csv
+ * @param {string}  argv.toDate - The starting date
+ * @param {string}  argv.fromDate - The end date
+ * 
+ * @returns {Promise<void>}
+ */
+
+
+async function parse(argv) {
+  /**
+   * Output a debug message. This will only work if --verbose is passed to the script
+   * @param {string} message - The message to output 
+   * @returns void
+   */
+  const debugMessage = message => {
+    if (!argv.verbose) return;
+    console.debug(typeof message === 'string' ? message : JSON.stringify(message));
+  };
+  /**
+   * Reads a CSV file from disk
+   * @param {string} filepath - The path to the csv
+   * @returns {Promise<string>} - The contents of the file
+   */
+
+
+  async function readCsv(filepath) {
+    try {
+      return await fs.readFile(filepath, 'utf8');
+    } catch (e) {
+      return e;
+    }
+  }
+  /**
+   * Creates an ics event
+   * 
+   * @param {Object} args - The function arguments
+   * @param {string} args.subject
+   * @param {string} args.course
+   * @param {string} args.section
+   * @param {string} args.instructor
+   * @param {string} args.email
+   * @param {string} args.days
+   * @param {string} args.times
+   * @param {string} args.fromDate
+   * @param {string} args.toDate 
+   * 
+   * @returns {Promise<string>} - Returns a promise that resolves with the ICS event
+   */
+
+
+  async function createIcsEvent({
+    title,
+    subject,
+    course,
+    section,
+    instructor,
+    email,
+    days,
+    times,
+    fromDate,
+    toDate
+  }) {
+    const daysArr = daysFromString(days);
+    const rrule = new RRule({
+      freq: RRule.WEEKLY,
+      byweekday: daysArr.map(day => {
+        switch (day) {
+          case 'U':
+            return RRule.SU;
+
+          case 'M':
+            return RRule.MO;
+
+          case 'T':
+            return RRule.TU;
+
+          case 'W':
+            return RRule.WE;
+
+          case 'R':
+            return RRule.TH;
+
+          case 'F':
+            return RRule.FR;
+
+          case 'S':
+            return RRule.SA;
+        }
+      }).filter(day => day),
+      until: new Date(toDate)
+    });
+    const firstDay = firstDayAfterDate(fromDate, days, times, moment);
+    const start = firstDay.format('YYYY-M-D-H-m').split("-");
+    const duration = timeDiff(times); // rrule.toString() will include the beginning RRULE:
+    // This is not needed with the ics library
+    // This line of code splits the returned rrule string at RRULE: and assigns the
+    // second part (the part we need) to a variable.
+
+    const [, recurrenceRule] = rrule.toString().split('RRULE:');
+    const eventTitle = `${subject} ${course} ${section}`;
+    const event = {
+      // Start is in the format [year, month, day, hour, min]
+      start: start,
+      duration: duration,
+      recurrenceRule: recurrenceRule,
+      title: eventTitle,
+      description: title,
+      status: 'CONFIRMED',
+      organizer: {
+        name: flipName(instructor),
+        email: email
+      }
+    };
+    return new Promise((resolve, reject) => {
+      ics.createEvent(event, (err, val) => {
+        if (err) reject(err);
+        resolve(val);
+      });
+    });
+  }
+  /**
+   * Writes an ics file to disk
+   * @param {string} icsData - The generated ics data 
+   * @param {string} fileName - The full file name to save
+   * @returns {Promise<string>} - Returns a promise that will resolve with the created filename
+   */
+
+
+  async function writeIcsToDisk(icsData, fileName) {
+    try {
+      await fs.writeFile(fileName, icsData);
+      return fileName;
+    } catch (e) {
+      return e;
+    }
+  }
+  /**
+   * Runs the parser
+   * @return {Promise<{ title: string; subject: string; course: string; section: string; instructor: string; email: string; days: string; times: string; fromDate: any; toDate: any; filename: string; }[]>} - Returns a promise that resolves with the created files
+   */
+
+
+  async function runParser() {
+    return new Promise((resolve, reject) => {
+      Papa.parse(csv, {
+        complete: async results => {
+          // keep track of the created files, along with the source row
+          let created = []; // Get the rows from papa parse
+
+          const rows = results.data.slice(1);
+
+          if (rows.length === 0) {
+            reject('No rows could be parsed from csv');
+          }
+
+          let i = 0;
+          var _iteratorNormalCompletion = true;
+          var _didIteratorError = false;
+
+          var _iteratorError;
+
+          try {
+            for (var _iterator = _asyncIterator(rows), _step, _value; _step = await _iterator.next(), _iteratorNormalCompletion = _step.done, _value = await _step.value, !_iteratorNormalCompletion; _iteratorNormalCompletion = true) {
+              let r = _value;
+
+              try {
+                debugMessage('-------------------------------------------');
+                debugMessage(`Processing row ${i}`);
+                debugMessage(r); // validate the row
+
+                const row = await validateRow(r);
+                const [title, subject, course, instr1, instr2, email1, email2, days1, days2, time1, time2, section] = row;
+                const ics1 = await createIcsEvent({
+                  title,
+                  subject,
+                  course,
+                  section,
+                  instructor: instr1,
+                  email: email1,
+                  days: days1,
+                  times: time1,
+                  fromDate: args.fromDate,
+                  toDate: args.toDate
+                }); // Set the file name
+
+                const fn1 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days1.replace(/,/g, '')}__${time1.replace(/[:-\s]/g, '')}`;
+                const ext = '.ics';
+                const fp1 = path.join(outputDir, fn1 + ext);
+                const f1 = await writeIcsToDisk(ics1, fp1);
+                debugMessage('Created' + ' ' + f1);
+                created.push({
+                  title,
+                  subject,
+                  course,
+                  section,
+                  instructor: instr1,
+                  email: email1,
+                  days: days1,
+                  times: time1,
+                  fromDate: args.fromDate,
+                  toDate: args.toDate,
+                  filename: f1
+                });
+
+                if (days2 && time2) {
+                  const ics2 = await createIcsEvent({
+                    title,
+                    subject,
+                    course,
+                    section,
+                    instructor: instr1,
+                    email: email1,
+                    days: days2,
+                    times: time2,
+                    fromDate: args.fromDate,
+                    toDate: args.toDate
+                  });
+                  const fn2 = `${title.replace(/[/\\?%*:|"<>\s]/g, '-')}__${section}_${days2.replace(/,/g, '')}__${time2.replace(/[:-\s]/g, '')}`;
+                  const fp2 = path.join(outputDir, fn2 + ext);
+                  const f2 = await writeIcsToDisk(ics2, fp2);
+                  debugMessage('Created' + ' ' + f2);
+                  created.push({
+                    title,
+                    subject,
+                    course,
+                    section,
+                    instructor: instr1,
+                    email: email1,
+                    days: days2,
+                    times: time2,
+                    fromDate: args.fromDate,
+                    toDate: args.toDate,
+                    filename: f2
+                  });
+                }
+              } catch (e) {
+                debugMessage(e);
+              } finally {
+                i++;
+              }
+            } // once everything is done processing, create the index json file
+
+          } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion && _iterator.return != null) {
+                await _iterator.return();
+              }
+            } finally {
+              if (_didIteratorError) {
+                throw _iteratorError;
+              }
+            }
+          }
+
+          await fs.writeFile(outputDir + '/' + 'index.json', JSON.stringify(created), 'utf8');
+          debugMessage('Done!');
+          resolve(created);
+        }
+      });
+    });
+  } // Validate the arguments
+
+
+  const args = await validateArgs(argv); // Set the output directory based on the arguments provided
+
+  const outputDir = path.normalize(args.outputDir); // Read the CSV
+
+  const csv = await readCsv(path.normalize(args.inputFile));
+  return runParser();
+}
+
+module.exports = {
+  parse,
+  makeSite
+};
 //# sourceMappingURL=course2ics-parser.js.map

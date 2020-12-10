@@ -19,16 +19,14 @@ const { parse } = require('course2ics-parser')
 
 (async () => {
 
-    const inputFile = 'some/path/to/report.csv'
-    const outputDir = 'some/path/to/output/dir'
-
-    // From date in the format of 'MM-DD-YYYY'
-    const fromDate = '12/01/2020'
-
-    // To date in the format of 'MM-DD-YYYY'
-    const toDate = '12/31/2020'
-
-    parse({ inputFile, outputDir, fromDate, toDate })
+    await parse({ 
+        inputFile: 'some/path/to/report.csv', 
+        outputDir: 'some/path/to/output/dir', 
+        fromDate: '12/01/2020', 
+        toDate: '12/31/2020',
+        verbose: false,
+        makeSite: true
+    })
 
 })()
 ```
