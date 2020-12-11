@@ -15,7 +15,7 @@ npm i course2ics-parser
 
 #### Quick start
 ```javascript
-const { parse } = require('course2ics-parser')
+const { parse, makeSite } = require('course2ics-parser')
 
 (async () => {
 
@@ -27,6 +27,11 @@ const { parse } = require('course2ics-parser')
         verbose: false,
         makeSite: true
     })
+
+    // You can also generate a static website that will allow users
+    // to search through the created files. This will generate an index.html
+    // file in the specified output directory
+    makeSite('some/path/to/output/dir')
 
 })()
 ```
