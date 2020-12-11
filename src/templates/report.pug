@@ -8,79 +8,93 @@ html(lang='en')
 
   body
     main.container
-      input#search(type='text' name='search' placeholder='Enter your course name, instructor name, or intstructor email')
-      table#results-table
-        thead
-          tr
-            th Title
-            th Subject
-            th Instructor
-            th Email
-            th Days
-            th Times
-            th Filename
-        tbody#results-tbody
+      h1 J-Term Course Search
+      input#search(type='text' name='search' placeholder='Enter your course name')
+      #search-results
+        ul#search-results-list
 
     script.
-      const res = !{results}
-      const $resultsTbody = document.getElementById('results-tbody')
+      // Get the data json that will be used as a source for the searches
+      const data = !{results}
 
+      // Create a placeholder for the search results
+      let searchResults = []
+
+      // Create a handle for the search input
       const $search = document.getElementById('search')
+
+      // Create a handle for the search results list
+      const $searchUL = document.getElementById('search-results-list')
 
       $search.addEventListener('keyup', e => {
 
+        // First cull the old results
+        searchResults = []
+
+        while($searchUL.firstChild) {
+          $searchUL.removeChild($searchUL.lastChild)
+        }
+        
+        // Get the input value
         const val = e.target.value
 
-        console.log(val)
+        // Don't bother processing if the user has not input more than 2 characters
+        if (val.length < 2) {
+          return
+        }
+
+        // If the length is 0, then clear the search results and return
+        if (val.length === 0) {
+          return
+        }
+
+        // Filter the data 
+        // The search should hit on instructor, title, or email        
+        let results = data.filter(row => {
+          if (row.title.toLowerCase().includes(val.toLowerCase())) {
+            return row
+          }
+        })
+
+        searchResults = results
+
+        // Create the list items that from the searchResults 
+        searchResults.forEach(row => {
+          const $el = document.createElement('li')
+
+          const $left = document.createElement('div')
+          $left.className = 'left'
+
+          const $right = document.createElement('div')
+          $right.className = 'right'
+
+          const $days = document.createElement('span')
+          $days.innerText = row.days
+
+          const $times = document.createElement('span')
+          $times.innerText = row.times
+
+          const $title = document.createElement('span')
+          $title.className= 'title'
+          $title.innerText = row.title
+
+          const $instructor = document.createElement('span')
+          $instructor.innerText = row.instructor
+
+          $left.append($title, $instructor)
+          $right.append($days, $times)
+
+          $el.append($left, $right)
+
+          $el.addEventListener('click', () => { window.open(row.filename) })
+
+          // Append the created element to the DOM
+          $searchUL.appendChild($el)
+        })
 
       })
 
-      function createTr(row) {
+      function createResults(row) {
         // Destructure the row
         const {title, subject, instructor, email, days, times, filename} = row
-
-        // Create the tr element
-        const $tr = document.createElement('tr')
-
-        // Create the title td
-        const $tdTitle = document.createElement('td')
-        $tdTitle.innerHTML = title
-        $tr.appendChild($tdTitle)
-
-        // Create the subject td
-        const $tdSubject = document.createElement('td')
-        $tdSubject.innerHTML = subject
-        $tr.appendChild($tdSubject)
-
-        // Create the instructor td
-        const $tdInstructor = document.createElement('td')
-        $tdInstructor.innerHTML = instructor
-        $tr.appendChild($tdInstructor)
-
-        // Create the email td
-        const $tdEmail = document.createElement('td')
-        $tdEmail.innerHTML = email
-        $tr.appendChild($tdEmail)
-
-        // Create the days td
-        const $tdDays = document.createElement('td')
-        $tdDays.innerHTML = days
-        $tr.appendChild($tdDays)
-
-        // Create the times td
-        const $tdTimes = document.createElement('td')
-        $tdTimes.innerHTML = times
-        $tr.appendChild($tdTimes)
-
-        // Create the filename td
-        const $tdFilename = document.createElement('td') 
-        $tdFilename.innerHTML = filename
-        $tr.appendChild($tdFilename)
-
-        return $tr
       }
-
-      res.forEach(r => {
-        const $r = createTr(r)
-        $resultsTbody.appendChild($r)
-      })

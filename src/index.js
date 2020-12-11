@@ -243,7 +243,7 @@ async function parse(argv) {
                 times: time1,
                 fromDate: args.fromDate,
                 toDate: args.toDate,
-                filename: f1
+                filename: path.basename(f1)
               })
 
               if (days2 && time2) {
@@ -275,7 +275,7 @@ async function parse(argv) {
                   times: time2,
                   fromDate: args.fromDate,
                   toDate: args.toDate,
-                  filename: f2
+                  filename: path.basename(f2)
                 })
               }
 
