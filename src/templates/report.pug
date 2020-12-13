@@ -7,94 +7,116 @@ html(lang='en')
       include ./report.css
 
   body
-    main.container
-      h1 Course Search
-      input#search(type='text' name='search' placeholder='Enter your course name')
-      #search-results
-        ul#search-results-list
+
+  .container
+    .input-group
+      span.label Start typing to search
+      input.search
+    .search-results
 
     script.
       // Get the data json that will be used as a source for the searches
       const data = !{results}
 
+      // DOM elements
+      const $label = document.querySelector('.label')
+      const $inputGroup = document.querySelector('.input-group')
+      const $search = document.querySelector('.search')
+      const $results = document.querySelector('.search-results')
+      const $container = document.querySelector('.container')
+      const $numResultsFound = document.querySelector('.num-results-found')
+
       // Create a placeholder for the search results
-      let searchResults = []
-
-      // Create a handle for the search input
-      const $search = document.getElementById('search')
-
-      // Create a handle for the search results list
-      const $searchUL = document.getElementById('search-results-list')
-
-      $search.addEventListener('keyup', e => {
-
-        // First cull the old results
-        searchResults = []
-
-        while($searchUL.firstChild) {
-          $searchUL.removeChild($searchUL.lastChild)
+      // Here, we will use setters and getters so that we can listen
+      // for when the data changes
+      const searchResults = {
+        _data: [],
+        _dataListener: function (val) {},
+        set data(val) {
+          this._data = val
+          this._dataListener(val)
+        },
+        get data() {
+          return this._data
+        },
+        registerListener: function(listener) {
+          this._dataListener = listener
         }
-        
-        // Get the input value
-        const val = e.target.value
+      }
 
-        // Don't bother processing if the user has not input more than 2 characters
-        if (val.length < 2) {
-          return
+      searchResults.registerListener(newTodos => {
+    
+        // Clear out the old search results
+        while ($results.firstChild) {
+          $results.removeChild($results.firstChild);
         }
+    
+        // Render how many results were found
+        const $el = document.createElement('div')
+        $el.classList.add('num-results')
+        $el.innerText = `${newTodos.length} results found`
+        $results.appendChild($el)
+    
+        // Render the new search values to the dom
+        newTodos.forEach(item => {
+          const $el = document.createElement('div')
+          $el.classList.add('search-result')
+          $el.innerHTML = `<strong>${item.title}</strong> - ${item.instructor} ${item.email} - ${item.days} ${item.times}`
+          // Add event listener so when a user clicks on teh item, they will be 
+          // taken to the ics file download
+          $el.addEventListener('click', () => {
+            window.open(item.filename)
+          })
+          $results.appendChild($el)
+        })
+      })
 
-        // If the length is 0, then clear the search results and return
+      $search.addEventListener('focus', () => {
+        $label.innerText = 'Commence the searching 🕵️'
+        $label.classList.add('active')
+      })
+
+      $search.addEventListener('blur', () => {
+        if ($search.value === '') {
+          $label.innerText = 'Start typing to search'
+          $label.classList.remove('active')
+        }
+      })
+
+      $search.addEventListener('keyup', event => {
+
+        const val = event.target.value
+
         if (val.length === 0) {
+          document.body.classList.remove('has-results')
+          $container.classList.remove('has-results')
+          $search.classList.remove('has-results')
+          $inputGroup.classList.remove('has-results')
+          searchResults.data = []
+          // Clear out the old search results
+          while ($results.firstChild) {
+            $results.removeChild($results.firstChild);
+          }
           return
         }
-
-        // Filter the data 
-        // The search should hit on instructor, title, or email        
-        let results = data.filter(row => {
+    
+        document.body.classList.add('has-results')
+        $container.classList.add('has-results')
+        $search.classList.add('has-results')
+        $inputGroup.classList.add('has-results')
+    
+        // Check to see if the val matches the title of any of the todos
+        const filtered = data.filter(row => {
           if (row.title.toLowerCase().includes(val.toLowerCase())) {
             return row
           }
         })
 
-        searchResults = results
-
-        // Create the list items that from the searchResults 
-        searchResults.forEach(row => {
-          const $el = document.createElement('li')
-
-          const $left = document.createElement('div')
-          $left.className = 'left'
-
-          const $right = document.createElement('div')
-          $right.className = 'right'
-
-          const $days = document.createElement('span')
-          $days.innerText = row.days
-
-          const $times = document.createElement('span')
-          $times.innerText = row.times
-
-          const $title = document.createElement('span')
-          $title.className= 'title'
-          $title.innerText = row.title
-
-          const $instructor = document.createElement('span')
-          $instructor.innerText = row.instructor
-
-          $left.append($title, $instructor)
-          $right.append($days, $times)
-
-          $el.append($left, $right)
-
-          $el.addEventListener('click', () => { window.open(row.filename) })
-
-          // Append the created element to the DOM
-          $searchUL.appendChild($el)
-        })
-
+        if (filtered.length === 0) {
+          console.log('none found')
+          const $noneFound = document.createElement('div')
+          $noneFound.innerText = '0 Results found ☹️'
+          $results.appendChild($noneFound)
+        }
+        searchResults.data = filtered
       })
-
-      function createResults(row) {
-        // Destructure the row
-        const {title, subject, instructor, email, days, times, filename} = row
-      }
