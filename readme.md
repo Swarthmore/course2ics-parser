@@ -1,10 +1,9 @@
 # course2ics-parser
 
-This script will transform a csv file into a number of ics events.
+This package has 2 main functionalities
 
-## Work in progress warning
-
-This repo is a work in progress
+1. Transform a CSV into a number of ics events
+2. Generate an `index.html` file that can be used to search through the generated events.
 
 ## Usage
 
@@ -15,20 +14,21 @@ npm i course2ics-parser
 
 #### Quick start
 ```javascript
-const { parse } = require('course2ics-parser')
+const { parse, makeSite } = require('course2ics-parser')
 
 (async () => {
 
-    const inputFile = 'some/path/to/report.csv'
-    const outputDir = 'some/path/to/output/dir'
+    // Parse the CSV file into ics events. CSV format MUST be in the format as listed in docs.
+    await parse({ 
+        inputFile: 'some/path/to/report.csv', 
+        outputDir: 'some/path/to/output/dir', 
+        fromDate: '12/01/2020', 
+        toDate: '12/31/2020',
+        verbose: false
+    })
 
-    // From date in the format of 'MM-DD-YYYY'
-    const fromDate = '12/01/2020'
-
-    // To date in the format of 'MM-DD-YYYY'
-    const toDate = '12/31/2020'
-
-    parse({ inputFile, outputDir, fromDate, toDate })
+    // Generate a site to allow users to search through the ics files
+    makeSite('some/path/to/output/dir')
 
 })()
 ```

@@ -6,12 +6,37 @@ const moment = require('moment')
 const { validateArgs, validateRow } = require('./validators')
 const { daysFromString, timeDiff, firstDayAfterDate, flipName } = require('./helpers')
 const path = require('path')
+const pug = require('pug')
 
 // See: https://momentjs.com/docs/#/use-it/node-js/
 moment().format()
 
 // See: https://github.com/moment/moment/issues/3488
 moment.suppressDeprecationWarnings = true;
+
+async function makeSite(outputDir) {
+
+  // Get the files json file in the directory
+  const files = await fs.readdir(outputDir)
+
+  const [index] = files.filter(file => path.extname(file) === '.json') 
+
+  if (!index) {
+    throw new Error('No index file found')
+  }
+
+  // Get the file contents of index json
+  const json = await fs.readFile(path.join(outputDir, index))
+
+  // If the index file exists, create the file using the template
+  const compiledFunction = pug.compileFile(path.join(process.cwd(), 'src', 'templates', 'report.pug'))
+
+  const html = compiledFunction({ results: json })
+
+  // Write index.html to the output directory
+  await fs.writeFile(path.join(outputDir, 'index.html'), html, 'utf8')
+
+}
 
 /**
  * Parses a csv and creates an ics file for each row. The generated ics will contain events recurring weekly from
@@ -218,7 +243,7 @@ async function parse(argv) {
                 times: time1,
                 fromDate: args.fromDate,
                 toDate: args.toDate,
-                filename: f1
+                filename: path.basename(f1)
               })
 
               if (days2 && time2) {
@@ -250,7 +275,7 @@ async function parse(argv) {
                   times: time2,
                   fromDate: args.fromDate,
                   toDate: args.toDate,
-                  filename: f2
+                  filename: path.basename(f2)
                 })
               }
 
@@ -289,4 +314,4 @@ async function parse(argv) {
 
 }
 
-module.exports = { parse }
+module.exports = { parse, makeSite }

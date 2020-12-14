@@ -1,6 +1,6 @@
 {
   "name": "course2ics-parser",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "license": "MIT",
   "author": "Swarthmore College <aweed1@swarthmore.edu> (https://swarthmore.edu)",
   "source": "src/index.js",
@@ -11,14 +11,12 @@
     "build": "microbundle src/*.js --compress --raw --target node",
     "build:watch": "microbundle watch src/*.js --target node"
   },
-  "mangle": {
-		"regex": "^_"
-  },
   "dependencies": {
     "ics": "^2.26.1",
     "lodash": "^4.17.20",
     "moment": "^2.29.1",
     "papaparse": "^5.3.0",
+    "pug": "^3.0.0",
     "rrule": "^2.6.6"
   },
   "devDependencies": {
