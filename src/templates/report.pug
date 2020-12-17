@@ -61,7 +61,7 @@ html(lang='en')
         newTodos.forEach(item => {
           const $el = document.createElement('div')
           $el.classList.add('search-result')
-          $el.innerHTML = `<strong>${item.title}</strong> - ${item.instructor} ${item.email} - ${item.days} ${item.times}`
+          $el.innerHTML = `<strong>${item.title}</strong> - ${item.instructor} - ${item.subject}${item.course}${item.section} - ${item.email} - ${item.days} ${item.times}`
           // Add event listener so when a user clicks on teh item, they will be 
           // taken to the ics file download
           $el.addEventListener('click', () => {
